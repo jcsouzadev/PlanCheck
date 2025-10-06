@@ -38,12 +38,26 @@
                         <tbody>
                             {% for item in plano.itens %}
                             <tr>
-                                <td>{{ item.descricao }}</td>
+                                <td>
+                                    <strong>{{ item.descricao }}</strong>
+                                    {% if item.observacao %}
+                                    <br><small class="text-muted">{{ item.observacao }}</small>
+                                    {% endif %}
+                                    {% if item.tipo == 'medicoes' and (item.valor_min or item.valor_max) %}
+                                    <br><small class="text-info">
+                                        <i class="bi bi-speedometer2"></i> 
+                                        Min: {{ item.valor_min if item.valor_min else '-' }} | 
+                                        Max: {{ item.valor_max if item.valor_max else '-' }}
+                                    </small>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if item.tipo == 'visual' %}
                                     <span class="badge bg-info">Visual</span>
                                     {% elif item.tipo == 'sensitiva' %}
                                     <span class="badge bg-warning">Sensitiva</span>
+                                    {% elif item.tipo == 'medicoes' %}
+                                    <span class="badge bg-success">Medições</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -87,23 +101,73 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="descricao" class="form-label">Descrição</label>
-                        <input type="text" class="form-control" id="descricao" name="descricao" required>
+                        <label for="descricao" class="form-label">Descrição *</label>
+                        <input type="text" class="form-control" id="descricao" name="descricao" required 
+                               placeholder="Ex: Verificar temperatura do motor">
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="tipo" class="form-label">Tipo de Inspeção</label>
-                        <select class="form-select" id="tipo" name="tipo" required>
+                        <label for="tipo" class="form-label">Tipo de Inspeção *</label>
+                        <select class="form-select" id="tipo" name="tipo" required onchange="toggleCamposMedicoes()">
+                            <option value="">Selecione...</option>
                             <option value="visual">Visual</option>
                             <option value="sensitiva">Sensitiva</option>
+                            <option value="medicoes">Medições / Grandezas</option>
                         </select>
+                        <small class="form-text text-muted">
+                            Visual: Inspeção visual | Sensitiva: Toque, som, vibração | Medições: Valores numéricos
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observacao" class="form-label">Observações</label>
+                        <textarea class="form-control" id="observacao" name="observacao" rows="2" 
+                                  placeholder="Informações adicionais sobre o item"></textarea>
+                    </div>
+                    
+                    <div id="camposMedicoes" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Configure os valores de referência para este item de medição
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="valor_min" class="form-label">Valor Mínimo</label>
+                                    <input type="number" step="0.01" class="form-control" id="valor_min" name="valor_min" 
+                                           placeholder="Ex: 60">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="valor_max" class="form-label">Valor Máximo</label>
+                                    <input type="number" step="0.01" class="form-control" id="valor_max" name="valor_max" 
+                                           placeholder="Ex: 80">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" name="adicionar_item" class="btn btn-primary">Adicionar</button>
+                    <button type="submit" name="adicionar_item" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Adicionar Item
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+function toggleCamposMedicoes() {
+    const tipo = document.getElementById('tipo').value;
+    const camposMedicoes = document.getElementById('camposMedicoes');
+    
+    if (tipo === 'medicoes') {
+        camposMedicoes.style.display = 'block';
+    } else {
+        camposMedicoes.style.display = 'none';
+    }
+}
+</script>
 {% endblock %}

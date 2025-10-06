@@ -332,11 +332,17 @@ def editar_plano(plano_id):
         if 'adicionar_item' in request.form:
             descricao = request.form.get('descricao')
             tipo = request.form.get('tipo')
+            observacao = request.form.get('observacao')
+            valor_min = request.form.get('valor_min')
+            valor_max = request.form.get('valor_max')
             
             if descricao:
                 item = ItemInspecao(
                     descricao=descricao,
                     tipo=tipo,
+                    observacao=observacao if observacao else None,
+                    valor_min=float(valor_min) if valor_min else None,
+                    valor_max=float(valor_max) if valor_max else None,
                     plano_id=plano.id
                 )
                 db.session.add(item)
