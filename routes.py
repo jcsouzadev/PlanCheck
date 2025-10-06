@@ -540,7 +540,7 @@ def relatorio_ordem_excel(ordem_id):
     ordem = OrdemExecucao.query.get_or_404(ordem_id)
     data = []
     
-    for apontamento in ordem.apontamentos:
+    for apontamento in ordem.itens_apontados:
         data.append({
             'Item': apontamento.item_inspecao.descricao,
             'Tipo': apontamento.item_inspecao.tipo or '-',
@@ -595,7 +595,7 @@ def dashboard_stats():
             if data_str not in dados_temporais:
                 dados_temporais[data_str] = {'conformes': 0, 'nao_conformes': 0}
             
-            for apontamento in ordem.apontamentos:
+            for apontamento in ordem.itens_apontados:
                 if apontamento.resultado == 'conforme':
                     dados_temporais[data_str]['conformes'] += 1
                 elif apontamento.resultado == 'nao_conforme':
