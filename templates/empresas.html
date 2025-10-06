@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Empresas - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-building"></i> Empresas</h1>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaEmpresa">
+                <i class="bi bi-plus-circle"></i> Nova Empresa
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Data de Criação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for empresa in empresas %}
+                            <tr>
+                                <td><strong>{{ empresa.nome }}</strong></td>
+                                <td>{{ empresa.data_criacao.strftime('%d/%m/%Y %H:%M') if empresa.data_criacao else '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('main.ver_empresa', empresa_id=empresa.id) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Ver Detalhes
+                                    </a>
+                                    <form method="POST" action="{{ url_for('main.deletar_empresa', empresa_id=empresa.id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta empresa? Todos os dados relacionados serão perdidos.');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i> Excluir
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">Nenhuma empresa cadastrada</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovaEmpresa" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Empresa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome da Empresa</label>
+                        <input type="text" class="form-control" id="nome" name="nome" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

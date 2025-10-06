@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}{{ empresa.nome }} - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.empresas') }}">Empresas</a></li>
+                <li class="breadcrumb-item active">{{ empresa.nome }}</li>
+            </ol>
+        </nav>
+        <h1 class="mb-4"><i class="bi bi-building"></i> {{ empresa.nome }}</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Estrutura Hierárquica</h5>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovoSetor">
+                    <i class="bi bi-plus"></i> Adicionar Setor
+                </button>
+            </div>
+            <div class="card-body">
+                {% if empresa.setores %}
+                <div class="accordion" id="accordionSetores">
+                    {% for setor in empresa.setores %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#setor{{ setor.id }}">
+                                <i class="bi bi-box-seam me-2"></i> Setor: {{ setor.nome }}
+                            </button>
+                        </h2>
+                        <div id="setor{{ setor.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSetores">
+                            <div class="accordion-body">
+                                <button type="button" class="btn btn-sm btn-success mb-3" onclick="showAreaModal({{ setor.id }}, '{{ setor.nome }}')">
+                                    <i class="bi bi-plus"></i> Adicionar Área
+                                </button>
+                                {% if setor.areas %}
+                                    {% for area in setor.areas %}
+                                    <div class="card mb-2">
+                                        <div class="card-header bg-light">
+                                            <strong><i class="bi bi-geo-alt"></i> Área: {{ area.nome }}</strong>
+                                            <button type="button" class="btn btn-sm btn-success float-end" onclick="showConjuntoModal({{ area.id }}, '{{ area.nome }}')">
+                                                <i class="bi bi-plus"></i> Adicionar Conjunto
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if area.conjuntos %}
+                                                {% for conjunto in area.conjuntos %}
+                                                <div class="ms-3 mb-2">
+                                                    <strong><i class="bi bi-collection"></i> Conjunto: {{ conjunto.nome }}</strong>
+                                                    <button type="button" class="btn btn-sm btn-success" onclick="showSubconjuntoModal({{ conjunto.id }}, '{{ conjunto.nome }}')">
+                                                        <i class="bi bi-plus"></i> Adicionar Subconjunto
+                                                    </button>
+                                                    {% if conjunto.subconjuntos %}
+                                                        {% for subconjunto in conjunto.subconjuntos %}
+                                                        <div class="ms-3 mb-2">
+                                                            <strong><i class="bi bi-grid"></i> Subconjunto: {{ subconjunto.nome }}</strong>
+                                                            <button type="button" class="btn btn-sm btn-success" onclick="showEquipamentoModal({{ subconjunto.id }}, '{{ subconjunto.nome }}')">
+                                                                <i class="bi bi-plus"></i> Adicionar Equipamento
+                                                            </button>
+                                                            {% if subconjunto.equipamentos %}
+                                                            <ul class="list-group list-group-flush ms-3 mt-2">
+                                                                {% for equipamento in subconjunto.equipamentos %}
+                                                                <li class="list-group-item">
+                                                                    <i class="bi bi-gear"></i> <strong>{{ equipamento.nome }}</strong>
+                                                                    {% if equipamento.codigo %}<span class="badge bg-secondary">{{ equipamento.codigo }}</span>{% endif %}
+                                                                    <span class="badge bg-info">{{ equipamento.planos|length }} planos</span>
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">Nenhuma área cadastrada neste setor</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Nenhum setor cadastrado. Clique em "Adicionar Setor" para começar.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovoSetor" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('main.adicionar_setor', empresa_id=empresa.id) }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Setor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome do Setor</label>
+                        <input type="text" class="form-control" id="nome" name="nome" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovaArea" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="formArea">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Área</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Setor: <strong id="setorNome"></strong></p>
+                    <div class="mb-3">
+                        <label for="nomeArea" class="form-label">Nome da Área</label>
+                        <input type="text" class="form-control" id="nomeArea" name="nome" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovoConjunto" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="formConjunto">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Conjunto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Área: <strong id="areaNome"></strong></p>
+                    <div class="mb-3">
+                        <label for="nomeConjunto" class="form-label">Nome do Conjunto</label>
+                        <input type="text" class="form-control" id="nomeConjunto" name="nome" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovoSubconjunto" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="formSubconjunto">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Subconjunto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Conjunto: <strong id="conjuntoNome"></strong></p>
+                    <div class="mb-3">
+                        <label for="nomeSubconjunto" class="form-label">Nome do Subconjunto</label>
+                        <input type="text" class="form-control" id="nomeSubconjunto" name="nome" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovoEquipamento" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="formEquipamento">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Equipamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Subconjunto: <strong id="subconjuntoNome"></strong></p>
+                    <div class="mb-3">
+                        <label for="nomeEquipamento" class="form-label">Nome do Equipamento</label>
+                        <input type="text" class="form-control" id="nomeEquipamento" name="nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="codigoEquipamento" class="form-label">Código (opcional)</label>
+                        <input type="text" class="form-control" id="codigoEquipamento" name="codigo">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAreaModal(setorId, setorNome) {
+    document.getElementById('setorNome').textContent = setorNome;
+    document.getElementById('formArea').action = `/setores/${setorId}/area`;
+    new bootstrap.Modal(document.getElementById('modalNovaArea')).show();
+}
+
+function showConjuntoModal(areaId, areaNome) {
+    document.getElementById('areaNome').textContent = areaNome;
+    document.getElementById('formConjunto').action = `/areas/${areaId}/conjunto`;
+    new bootstrap.Modal(document.getElementById('modalNovoConjunto')).show();
+}
+
+function showSubconjuntoModal(conjuntoId, conjuntoNome) {
+    document.getElementById('conjuntoNome').textContent = conjuntoNome;
+    document.getElementById('formSubconjunto').action = `/conjuntos/${conjuntoId}/subconjunto`;
+    new bootstrap.Modal(document.getElementById('modalNovoSubconjunto')).show();
+}
+
+function showEquipamentoModal(subconjuntoId, subconjuntoNome) {
+    document.getElementById('subconjuntoNome').textContent = subconjuntoNome;
+    document.getElementById('formEquipamento').action = `/subconjuntos/${subconjuntoId}/equipamento`;
+    new bootstrap.Modal(document.getElementById('modalNovoEquipamento')).show();
+}
+</script>
+{% endblock %}

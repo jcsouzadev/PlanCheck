@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Plano - {{ plano.titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.planos') }}">Planos</a></li>
+                <li class="breadcrumb-item active">{{ plano.titulo }}</li>
+            </ol>
+        </nav>
+        <h1 class="mb-4"><i class="bi bi-pencil"></i> Editar Plano: {{ plano.titulo }}</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> Itens de Inspeção</h5>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovoItem">
+                    <i class="bi bi-plus"></i> Adicionar Item
+                </button>
+            </div>
+            <div class="card-body">
+                {% if plano.itens %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Tipo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in plano.itens %}
+                            <tr>
+                                <td>{{ item.descricao }}</td>
+                                <td>
+                                    {% if item.tipo == 'visual' %}
+                                    <span class="badge bg-info">Visual</span>
+                                    {% elif item.tipo == 'sensitiva' %}
+                                    <span class="badge bg-warning">Sensitiva</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('main.deletar_item', item_id=item.id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este item?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i> Excluir
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Nenhum item cadastrado. Clique em "Adicionar Item" para começar.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <a href="{{ url_for('main.planos') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar para Planos
+        </a>
+        <a href="{{ url_for('main.ver_plano', plano_id=plano.id) }}" class="btn btn-info">
+            <i class="bi bi-eye"></i> Visualizar Plano
+        </a>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovoItem" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Item de Inspeção</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <input type="text" class="form-control" id="descricao" name="descricao" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo de Inspeção</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="visual">Visual</option>
+                            <option value="sensitiva">Sensitiva</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" name="adicionar_item" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

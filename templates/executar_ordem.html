@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Executar Ordem #{{ ordem.id }} - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.ordens') }}">Ordens</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('main.ver_ordem', ordem_id=ordem.id) }}">Ordem #{{ ordem.id }}</a></li>
+                <li class="breadcrumb-item active">Executar</li>
+            </ol>
+        </nav>
+        <h1 class="mb-4"><i class="bi bi-play-circle"></i> Executar Ordem #{{ ordem.id }}</h1>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <strong>Plano:</strong> {{ ordem.plano.titulo if ordem.plano else '-' }} <br>
+            <strong>Equipamento:</strong> {{ ordem.plano.equipamento.nome if ordem.plano and ordem.plano.equipamento else '-' }}
+        </div>
+    </div>
+</div>
+
+<form method="POST">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Checklist de Inspeção</h5>
+                </div>
+                <div class="card-body">
+                    {% if ordem.plano and ordem.plano.itens %}
+                    {% for item in ordem.plano.itens %}
+                    <div class="card mb-3 item-inspecao" id="card-item-{{ item.id }}">
+                        <div class="card-header bg-light">
+                            <strong>{{ loop.index }}. {{ item.descricao }}</strong>
+                            <span class="badge bg-{{ 'info' if item.tipo == 'visual' else 'warning' }}">{{ item.tipo|title }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Resultado</label>
+                                        <select class="form-select resultado-select" name="resultado_{{ item.id }}" id="resultado_{{ item.id }}" onchange="toggleNaoConformidade({{ item.id }})" required>
+                                            <option value="">Selecione</option>
+                                            <option value="conforme">Conforme</option>
+                                            <option value="nao_conforme">Não Conforme</option>
+                                            <option value="na">N/A</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Observação</label>
+                                        <input type="text" class="form-control" name="observacao_{{ item.id }}" placeholder="Observação (opcional)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Valor Atual (numérico, se aplicável)</label>
+                                        <input type="number" step="0.01" class="form-control" name="valor_atual_{{ item.id }}" placeholder="Ex: 25.5">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="nao-conformidade-fields" id="nao-conformidade-{{ item.id }}" style="display: none;">
+                                <hr>
+                                <h6 class="text-danger"><i class="bi bi-exclamation-triangle"></i> Informações de Não Conformidade</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Falha Identificada</label>
+                                            <textarea class="form-control" name="falha_{{ item.id }}" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Solução Proposta</label>
+                                            <textarea class="form-control" name="solucao_{{ item.id }}" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Tempo Necessário (horas)</label>
+                                            <input type="number" step="0.1" class="form-control" name="tempo_{{ item.id }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Quantidade de Executantes</label>
+                                            <input type="number" class="form-control" name="qtde_{{ item.id }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Materiais Necessários</label>
+                                            <textarea class="form-control" name="materiais_{{ item.id }}" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Outras Informações</label>
+                                            <textarea class="form-control" name="outros_{{ item.id }}" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">Nenhum item cadastrado neste plano.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <div class="col-12">
+            <a href="{{ url_for('main.ver_ordem', ordem_id=ordem.id) }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Cancelar
+            </a>
+            <button type="submit" name="salvar" class="btn btn-info">
+                <i class="bi bi-save"></i> Salvar Progresso
+            </button>
+            <button type="submit" name="finalizar" class="btn btn-success" onclick="return confirm('Tem certeza que deseja finalizar esta ordem?');">
+                <i class="bi bi-check-circle"></i> Finalizar Ordem
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleNaoConformidade(itemId) {
+    const select = document.getElementById('resultado_' + itemId);
+    const naoConformidadeDiv = document.getElementById('nao-conformidade-' + itemId);
+    const card = document.getElementById('card-item-' + itemId);
+    
+    if (select.value === 'nao_conforme') {
+        naoConformidadeDiv.style.display = 'block';
+        card.classList.add('border-danger');
+    } else {
+        naoConformidadeDiv.style.display = 'none';
+        card.classList.remove('border-danger');
+    }
+    
+    if (select.value === 'conforme') {
+        card.classList.add('border-success');
+    } else {
+        card.classList.remove('border-success');
+    }
+}
+</script>
+{% endblock %}

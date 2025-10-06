@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Ordens de Execução - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-list-check"></i> Ordens de Execução</h1>
+            {% if current_user.is_admin() %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaOrdem">
+                <i class="bi bi-plus-circle"></i> Nova Ordem
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Plano</th>
+                                <th>Executante</th>
+                                <th>Data Programada</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ordem in ordens %}
+                            <tr>
+                                <td><strong>{{ ordem.plano.titulo if ordem.plano else '-' }}</strong></td>
+                                <td>{{ ordem.executante.username if ordem.executante else '-' }}</td>
+                                <td>{{ ordem.data_programada.strftime('%d/%m/%Y') if ordem.data_programada else '-' }}</td>
+                                <td>
+                                    {% if ordem.status == 'pendente' %}
+                                    <span class="badge bg-warning text-dark">Pendente</span>
+                                    {% elif ordem.status == 'em_andamento' %}
+                                    <span class="badge bg-info">Em Andamento</span>
+                                    {% elif ordem.status == 'concluida' %}
+                                    <span class="badge bg-success">Concluída</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('main.ver_ordem', ordem_id=ordem.id) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    {% if ordem.status != 'concluida' %}
+                                    <a href="{{ url_for('main.executar_ordem', ordem_id=ordem.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-play-circle"></i> Executar
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Nenhuma ordem cadastrada</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if current_user.is_admin() %}
+<div class="modal fade" id="modalNovaOrdem" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Ordem de Execução</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="plano_id" class="form-label">Plano de Inspeção</label>
+                        <select class="form-select" id="plano_id" name="plano_id" required>
+                            <option value="">Selecione um plano</option>
+                            {% for plano in planos %}
+                            <option value="{{ plano.id }}">{{ plano.titulo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="executante_id" class="form-label">Executante</label>
+                        <select class="form-select" id="executante_id" name="executante_id" required>
+                            <option value="">Selecione um executante</option>
+                            {% for executante in executantes %}
+                            <option value="{{ executante.id }}">{{ executante.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="data_programada" class="form-label">Data Programada</label>
+                        <input type="date" class="form-control" id="data_programada" name="data_programada" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Ordem</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

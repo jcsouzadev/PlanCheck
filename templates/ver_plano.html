@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ plano.titulo }} - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.planos') }}">Planos</a></li>
+                <li class="breadcrumb-item active">{{ plano.titulo }}</li>
+            </ol>
+        </nav>
+        <h1 class="mb-4">{{ plano.titulo }}</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações do Plano</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Equipamento:</strong> {{ plano.equipamento.nome if plano.equipamento else '-' }}</p>
+                <p><strong>Tipo de Geração:</strong> 
+                    {% if plano.tipo_geracao == 'horario' %}Por Hora
+                    {% elif plano.tipo_geracao == 'diario' %}Diário
+                    {% elif plano.tipo_geracao == 'data_abertura' %}Por Data de Abertura
+                    {% endif %}
+                </p>
+                <p><strong>Frequência:</strong> {{ plano.frequencia if plano.frequencia else '-' }}</p>
+                <p><strong>Data de Início:</strong> {{ plano.data_inicio.strftime('%d/%m/%Y') if plano.data_inicio else '-' }}</p>
+                <p><strong>Data de Criação:</strong> {{ plano.data_criacao.strftime('%d/%m/%Y %H:%M') if plano.data_criacao else '-' }}</p>
+                <p><strong>Total de Itens:</strong> {{ plano.itens|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-download"></i> Ações</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('main.editar_plano', plano_id=plano.id) }}" class="btn btn-warning mb-2 w-100">
+                    <i class="bi bi-pencil"></i> Editar Plano
+                </a>
+                <a href="{{ url_for('main.relatorio_plano_pdf', plano_id=plano.id) }}" class="btn btn-danger mb-2 w-100" target="_blank">
+                    <i class="bi bi-file-pdf"></i> Exportar PDF
+                </a>
+                <a href="{{ url_for('main.relatorio_plano_excel', plano_id=plano.id) }}" class="btn btn-success mb-2 w-100">
+                    <i class="bi bi-file-excel"></i> Exportar Excel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> Itens de Inspeção</h5>
+            </div>
+            <div class="card-body">
+                {% if plano.itens %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Descrição</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in plano.itens %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ item.descricao }}</td>
+                                <td>
+                                    {% if item.tipo == 'visual' %}
+                                    <span class="badge bg-info">Visual</span>
+                                    {% elif item.tipo == 'sensitiva' %}
+                                    <span class="badge bg-warning">Sensitiva</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Nenhum item cadastrado neste plano.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <a href="{{ url_for('main.planos') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar para Planos
+        </a>
+    </div>
+</div>
+{% endblock %}

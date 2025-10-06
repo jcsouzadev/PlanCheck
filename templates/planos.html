@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Planos de Inspeção - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-file-earmark-text"></i> Planos de Inspeção</h1>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovoPlano">
+                <i class="bi bi-plus-circle"></i> Novo Plano
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Equipamento</th>
+                                <th>Tipo de Geração</th>
+                                <th>Itens</th>
+                                <th>Data de Criação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for plano in planos %}
+                            <tr>
+                                <td><strong>{{ plano.titulo }}</strong></td>
+                                <td>{{ plano.equipamento.nome if plano.equipamento else '-' }}</td>
+                                <td>
+                                    {% if plano.tipo_geracao == 'horario' %}
+                                        <span class="badge bg-info">Por Hora</span>
+                                    {% elif plano.tipo_geracao == 'diario' %}
+                                        <span class="badge bg-warning">Diário</span>
+                                    {% elif plano.tipo_geracao == 'data_abertura' %}
+                                        <span class="badge bg-primary">Por Data</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-secondary">{{ plano.itens|length }} itens</span></td>
+                                <td>{{ plano.data_criacao.strftime('%d/%m/%Y') if plano.data_criacao else '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('main.ver_plano', plano_id=plano.id) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    <a href="{{ url_for('main.editar_plano', plano_id=plano.id) }}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <a href="{{ url_for('main.relatorio_plano_pdf', plano_id=plano.id) }}" class="btn btn-sm btn-danger" target="_blank">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
+                                    <a href="{{ url_for('main.relatorio_plano_excel', plano_id=plano.id) }}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-file-excel"></i> Excel
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Nenhum plano cadastrado</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovoPlano" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Plano de Inspeção</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título do Plano</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="equipamento_id" class="form-label">Equipamento</label>
+                        <select class="form-select" id="equipamento_id" name="equipamento_id" required>
+                            <option value="">Selecione um equipamento</option>
+                            {% for equipamento in equipamentos %}
+                            <option value="{{ equipamento.id }}">{{ equipamento.nome }} - {{ equipamento.subconjunto.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo_geracao" class="form-label">Tipo de Geração</label>
+                        <select class="form-select" id="tipo_geracao" name="tipo_geracao">
+                            <option value="horario">Por Hora</option>
+                            <option value="diario">Diário</option>
+                            <option value="data_abertura">Por Data de Abertura</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="frequencia" class="form-label">Frequência (em horas ou dias)</label>
+                                <input type="number" step="0.1" class="form-control" id="frequencia" name="frequencia">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_inicio" class="form-label">Data de Início</label>
+                                <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar e Adicionar Itens</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Ordem #{{ ordem.id }} - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.ordens') }}">Ordens</a></li>
+                <li class="breadcrumb-item active">Ordem #{{ ordem.id }}</li>
+            </ol>
+        </nav>
+        <h1 class="mb-4">Ordem de Execução #{{ ordem.id }}</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações da Ordem</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Plano:</strong> {{ ordem.plano.titulo if ordem.plano else '-' }}</p>
+                <p><strong>Equipamento:</strong> {{ ordem.plano.equipamento.nome if ordem.plano and ordem.plano.equipamento else '-' }}</p>
+                <p><strong>Executante:</strong> {{ ordem.executante.username if ordem.executante else '-' }}</p>
+                <p><strong>Data Programada:</strong> {{ ordem.data_programada.strftime('%d/%m/%Y') if ordem.data_programada else '-' }}</p>
+                <p><strong>Data de Conclusão:</strong> {{ ordem.data_conclusao.strftime('%d/%m/%Y %H:%M') if ordem.data_conclusao else '-' }}</p>
+                <p><strong>Status:</strong> 
+                    {% if ordem.status == 'pendente' %}
+                    <span class="badge bg-warning text-dark">Pendente</span>
+                    {% elif ordem.status == 'em_andamento' %}
+                    <span class="badge bg-info">Em Andamento</span>
+                    {% elif ordem.status == 'concluida' %}
+                    <span class="badge bg-success">Concluída</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Resumo da Execução</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total de Itens:</strong> {{ ordem.plano.itens|length if ordem.plano else 0 }}</p>
+                <p><strong>Itens Apontados:</strong> {{ ordem.itens_apontados|length }}</p>
+                {% if ordem.itens_apontados %}
+                <p><strong>Conformes:</strong> <span class="badge bg-success">{{ ordem.itens_apontados|selectattr('resultado', 'equalto', 'conforme')|list|length }}</span></p>
+                <p><strong>Não Conformes:</strong> <span class="badge bg-danger">{{ ordem.itens_apontados|selectattr('resultado', 'equalto', 'nao_conforme')|list|length }}</span></p>
+                <p><strong>N/A:</strong> <span class="badge bg-secondary">{{ ordem.itens_apontados|selectattr('resultado', 'equalto', 'na')|list|length }}</span></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if ordem.itens_apontados %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> Itens Inspecionados</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="accordionItens">
+                    {% for item_apontado in ordem.itens_apontados %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item{{ item_apontado.id }}">
+                                {{ item_apontado.item_inspecao.descricao if item_apontado.item_inspecao else '-' }}
+                                {% if item_apontado.resultado == 'conforme' %}
+                                <span class="badge bg-success ms-2">Conforme</span>
+                                {% elif item_apontado.resultado == 'nao_conforme' %}
+                                <span class="badge bg-danger ms-2">Não Conforme</span>
+                                {% elif item_apontado.resultado == 'na' %}
+                                <span class="badge bg-secondary ms-2">N/A</span>
+                                {% endif %}
+                            </button>
+                        </h2>
+                        <div id="item{{ item_apontado.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionItens">
+                            <div class="accordion-body">
+                                {% if item_apontado.observacao %}
+                                <p><strong>Observação:</strong> {{ item_apontado.observacao }}</p>
+                                {% endif %}
+                                {% if item_apontado.valor_atual %}
+                                <p><strong>Valor Atual:</strong> {{ item_apontado.valor_atual }}</p>
+                                {% endif %}
+                                {% if item_apontado.resultado == 'nao_conforme' %}
+                                <hr>
+                                <h6 class="text-danger">Informações de Não Conformidade:</h6>
+                                {% if item_apontado.falha %}
+                                <p><strong>Falha:</strong> {{ item_apontado.falha }}</p>
+                                {% endif %}
+                                {% if item_apontado.solucao %}
+                                <p><strong>Solução:</strong> {{ item_apontado.solucao }}</p>
+                                {% endif %}
+                                {% if item_apontado.tempo_necessario %}
+                                <p><strong>Tempo Necessário:</strong> {{ item_apontado.tempo_necessario }} horas</p>
+                                {% endif %}
+                                {% if item_apontado.qtde_executantes %}
+                                <p><strong>Quantidade de Executantes:</strong> {{ item_apontado.qtde_executantes }}</p>
+                                {% endif %}
+                                {% if item_apontado.materiais %}
+                                <p><strong>Materiais:</strong> {{ item_apontado.materiais }}</p>
+                                {% endif %}
+                                {% if item_apontado.outros %}
+                                <p><strong>Outros:</strong> {{ item_apontado.outros }}</p>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-3">
+    <div class="col-12">
+        <a href="{{ url_for('main.ordens') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar para Ordens
+        </a>
+        {% if ordem.status != 'concluida' %}
+        <a href="{{ url_for('main.executar_ordem', ordem_id=ordem.id) }}" class="btn btn-primary">
+            <i class="bi bi-play-circle"></i> Executar/Continuar
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
