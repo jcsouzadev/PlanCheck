@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Ordem #{{ ordem.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 10px;
+        }
+        .info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #0d6efd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .conforme {
+            background-color: #d1e7dd;
+        }
+        .nao-conforme {
+            background-color: #f8d7da;
+        }
+        .na {
+            background-color: #fff3cd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Ordem de Execução #{{ ordem.id }}</h1>
+    
+    <div class="info">
+        <p><strong>Plano:</strong> {{ ordem.plano.titulo }}</p>
+        <p><strong>Equipamento:</strong> {{ ordem.plano.equipamento.nome }}</p>
+        <p><strong>Executante:</strong> {{ ordem.executante.username }}</p>
+        <p><strong>Data Programada:</strong> {{ ordem.data_programada.strftime('%d/%m/%Y') }}</p>
+        <p><strong>Status:</strong> {{ ordem.status.upper() }}</p>
+        {% if ordem.data_conclusao %}
+        <p><strong>Data de Conclusão:</strong> {{ ordem.data_conclusao.strftime('%d/%m/%Y %H:%M') }}</p>
+        {% endif %}
+    </div>
+
+    <h2>Itens Apontados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>Tipo</th>
+                <th>Resultado</th>
+                <th>Observação</th>
+                <th>Falha</th>
+                <th>Solução</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for apontamento in ordem.apontamentos %}
+            <tr class="{% if apontamento.resultado == 'conforme' %}conforme{% elif apontamento.resultado == 'nao_conforme' %}nao-conforme{% else %}na{% endif %}">
+                <td>{{ loop.index }}</td>
+                <td>{{ apontamento.item_inspecao.descricao }}</td>
+                <td>{{ apontamento.item_inspecao.tipo or '-' }}</td>
+                <td>{{ apontamento.resultado or '-' }}</td>
+                <td>{{ apontamento.observacao or '-' }}</td>
+                <td>{{ apontamento.falha or '-' }}</td>
+                <td>{{ apontamento.solucao or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

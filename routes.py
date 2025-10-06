@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User, Empresa, Setor, Area, Conjunto, Subconjunto, Equipamento, PlanoInspecao, ItemInspecao, OrdemExecucao, ItemInspecaoApontado
 from utils import gerar_pdf, gerar_excel
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 from functools import wraps
 
@@ -319,7 +319,8 @@ def planos():
 @login_required
 def ver_plano(plano_id):
     plano = PlanoInspecao.query.get_or_404(plano_id)
-    return render_template('ver_plano.html', plano=plano)
+    usuarios = User.query.all()
+    return render_template('ver_plano.html', plano=plano, User=User)
 
 @main_bp.route('/planos/<int:plano_id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -366,6 +367,43 @@ def deletar_item(item_id):
     db.session.commit()
     flash('Item excluído com sucesso!', 'success')
     return redirect(url_for('main.editar_plano', plano_id=plano_id))
+
+@main_bp.route('/planos/<int:plano_id>/gerar-ordem', methods=['POST'])
+@login_required
+@admin_required
+def gerar_ordem_automatica(plano_id):
+    plano = PlanoInspecao.query.get_or_404(plano_id)
+    executante_id = request.form.get('executante_id')
+    
+    if not executante_id:
+        flash('Selecione um executante!', 'warning')
+        return redirect(url_for('main.ver_plano', plano_id=plano_id))
+    
+    ultima_ordem = OrdemExecucao.query.filter_by(plano_id=plano_id).order_by(OrdemExecucao.data_programada.desc()).first()
+    
+    if plano.tipo_geracao == 'horario':
+        if ultima_ordem:
+            data_programada = ultima_ordem.data_programada + timedelta(hours=plano.frequencia)
+        else:
+            data_programada = plano.data_inicio or datetime.now()
+    elif plano.tipo_geracao == 'diario':
+        if ultima_ordem:
+            data_programada = ultima_ordem.data_programada + timedelta(days=plano.frequencia)
+        else:
+            data_programada = plano.data_inicio or datetime.now()
+    else:
+        data_programada = datetime.now()
+    
+    ordem = OrdemExecucao(
+        plano_id=plano_id,
+        executante_id=executante_id,
+        data_programada=data_programada
+    )
+    db.session.add(ordem)
+    db.session.commit()
+    
+    flash(f'Ordem gerada automaticamente para {data_programada.strftime("%d/%m/%Y %H:%M")}!', 'success')
+    return redirect(url_for('main.ver_plano', plano_id=plano_id))
 
 @main_bp.route('/ordens', methods=['GET', 'POST'])
 @login_required
@@ -484,6 +522,42 @@ def relatorio_plano_excel(plano_id):
     df = pd.DataFrame(data)
     return gerar_excel(df, filename=f'plano_{plano_id}_{plano.titulo}.xlsx')
 
+@main_bp.route('/relatorios/ordens/<int:ordem_id>/pdf')
+@login_required
+def relatorio_ordem_pdf(ordem_id):
+    ordem = OrdemExecucao.query.get_or_404(ordem_id)
+    return gerar_pdf('relatorio_ordem.html', ordem=ordem)
+
+@main_bp.route('/relatorios/ordens/<int:ordem_id>/excel')
+@login_required
+def relatorio_ordem_excel(ordem_id):
+    ordem = OrdemExecucao.query.get_or_404(ordem_id)
+    data = []
+    
+    for apontamento in ordem.apontamentos:
+        data.append({
+            'Item': apontamento.item_inspecao.descricao,
+            'Tipo': apontamento.item_inspecao.tipo or '-',
+            'Resultado': apontamento.resultado or '-',
+            'Observação': apontamento.observacao or '-',
+            'Valor Atual': apontamento.valor_atual or '-',
+            'Falha': apontamento.falha or '-',
+            'Solução': apontamento.solucao or '-',
+            'Tempo (h)': apontamento.tempo_necessario or '-',
+            'Qtd Executantes': apontamento.qtde_executantes or '-',
+            'Materiais': apontamento.materiais or '-'
+        })
+    
+    df = pd.DataFrame(data)
+    return gerar_excel(df, filename=f'ordem_{ordem_id}.xlsx')
+
+@main_bp.route('/relatorios/equipamentos/<int:equipamento_id>/pdf')
+@login_required
+def relatorio_equipamento_pdf(equipamento_id):
+    equipamento = Equipamento.query.get_or_404(equipamento_id)
+    planos = PlanoInspecao.query.filter_by(equipamento_id=equipamento_id).all()
+    return gerar_pdf('relatorio_equipamento.html', equipamento=equipamento, planos=planos)
+
 @main_bp.route('/api/dashboard/stats')
 @login_required
 def dashboard_stats():
@@ -506,6 +580,25 @@ def dashboard_stats():
         elif item.resultado == 'na':
             itens_na += 1
     
+    ordens_concluidas_lista = OrdemExecucao.query.filter_by(status='concluida').order_by(OrdemExecucao.data_conclusao.desc()).limit(30).all()
+    dados_temporais = {}
+    
+    for ordem in ordens_concluidas_lista:
+        if ordem.data_conclusao:
+            data_str = ordem.data_conclusao.strftime('%d/%m')
+            if data_str not in dados_temporais:
+                dados_temporais[data_str] = {'conformes': 0, 'nao_conformes': 0}
+            
+            for apontamento in ordem.apontamentos:
+                if apontamento.resultado == 'conforme':
+                    dados_temporais[data_str]['conformes'] += 1
+                elif apontamento.resultado == 'nao_conforme':
+                    dados_temporais[data_str]['nao_conformes'] += 1
+    
+    datas = list(dados_temporais.keys())
+    conformes_temporal = [dados_temporais[d]['conformes'] for d in datas]
+    nao_conformes_temporal = [dados_temporais[d]['nao_conformes'] for d in datas]
+    
     return jsonify({
         'ordens': {
             'total': total_ordens,
@@ -518,5 +611,10 @@ def dashboard_stats():
             'conformes': itens_conformes,
             'nao_conformes': itens_nao_conformes,
             'na': itens_na
+        },
+        'temporal': {
+            'datas': datas,
+            'conformes': conformes_temporal,
+            'nao_conformes': nao_conformes_temporal
         }
     })

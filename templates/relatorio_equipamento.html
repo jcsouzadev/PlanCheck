@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Equipamento - {{ equipamento.nome }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 10px;
+        }
+        .info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #0d6efd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #0d6efd;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Equipamento - {{ equipamento.nome }}</h1>
+    
+    <div class="info">
+        <p><strong>Código:</strong> {{ equipamento.codigo or '-' }}</p>
+        <p><strong>Subconjunto:</strong> {{ equipamento.subconjunto.nome }}</p>
+        <p><strong>Conjunto:</strong> {{ equipamento.subconjunto.conjunto.nome }}</p>
+        <p><strong>Área:</strong> {{ equipamento.subconjunto.conjunto.area.nome }}</p>
+        <p><strong>Setor:</strong> {{ equipamento.subconjunto.conjunto.area.setor.nome }}</p>
+        <p><strong>Empresa:</strong> {{ equipamento.subconjunto.conjunto.area.setor.empresa.nome }}</p>
+    </div>
+
+    <h2>Planos de Inspeção</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Tipo de Geração</th>
+                <th>Frequência</th>
+                <th>Total de Itens</th>
+                <th>Data de Criação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plano in planos %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ plano.titulo }}</td>
+                <td>{{ plano.tipo_geracao }}</td>
+                <td>{{ plano.frequencia or '-' }}</td>
+                <td>{{ plano.itens|length }}</td>
+                <td>{{ plano.data_criacao.strftime('%d/%m/%Y') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

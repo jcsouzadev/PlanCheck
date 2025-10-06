@@ -155,16 +155,35 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 - `SESSION_SECRET`: Chave secreta para sessões Flask
 - `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`: Credenciais do PostgreSQL
 
+## Funcionalidades Implementadas Recentemente
+
+### Geração Automática de Ordens
+- Sistema de geração automática baseado em frequência do plano
+- Cálculo inteligente de datas (por hora ou diário)
+- Modal para seleção de executante
+- Botão disponível na visualização de planos (apenas para administradores)
+
+### Relatórios Avançados
+- **Relatório de Ordem** (PDF/Excel): Exporta dados completos da execução
+- **Relatório de Equipamento** (PDF): Visualização hierárquica com todos os planos
+- Botões de exportação na visualização de ordens concluídas
+- Formatação profissional com cores e badges
+
+### Dashboard Aprimorado
+- **Gráfico de Linha Temporal**: Evolução das inspeções (últimas 30 ordens)
+- Comparação visual entre conformes e não conformes ao longo do tempo
+- API de estatísticas com dados temporais
+- Três gráficos interativos: Pizza (conformidade), Barras (status) e Linha (evolução)
+
 ## Melhorias Futuras Sugeridas
 
-1. **Geração Automática de Ordens**: Implementar gatilhos baseados em frequência
-2. **Notificações**: Sistema de alertas para ordens pendentes
-3. **Filtros Avançados**: Busca e filtro em todas as listas
-4. **Dashboard Analítico**: Drill-down por empresa/setor/área
-5. **Anexos**: Upload de fotos durante inspeção
-6. **Assinatura Digital**: Registro de responsáveis
-7. **API REST**: Para integração com outros sistemas
-8. **Mobile**: Interface responsiva otimizada para tablets
+1. **Notificações**: Sistema de alertas para ordens pendentes
+2. **Filtros Avançados**: Busca e filtro em todas as listas
+3. **Dashboard Analítico**: Drill-down por empresa/setor/área
+4. **Anexos**: Upload de fotos durante inspeção
+5. **Assinatura Digital**: Registro de responsáveis
+6. **API REST**: Para integração com outros sistemas
+7. **Mobile**: Interface responsiva otimizada para tablets
 
 ## Estado Atual do Projeto
 
@@ -173,8 +192,11 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 ✅ Planos de inspeção com itens configuráveis
 ✅ Ordens de execução com checklist interativo
 ✅ Campos dinâmicos de não conformidade
-✅ Geração de relatórios PDF e Excel
-✅ Dashboard com gráficos em tempo real
+✅ **Geração automática de ordens baseada em frequência**
+✅ **Relatórios por ordem de execução (PDF/Excel)**
+✅ **Relatórios por equipamento com hierarquia completa**
+✅ **Gráfico de linha temporal mostrando evolução das inspeções**
+✅ **Dashboard com estatísticas avançadas e análise temporal**
 ✅ Interface em português brasileiro
 ✅ Banco de dados PostgreSQL configurado
 ✅ Sistema rodando na porta 5000

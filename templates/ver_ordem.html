@@ -131,6 +131,14 @@
             <i class="bi bi-play-circle"></i> Executar/Continuar
         </a>
         {% endif %}
+        {% if ordem.status == 'concluida' %}
+        <a href="{{ url_for('main.relatorio_ordem_pdf', ordem_id=ordem.id) }}" class="btn btn-danger" target="_blank">
+            <i class="bi bi-file-pdf"></i> Exportar PDF
+        </a>
+        <a href="{{ url_for('main.relatorio_ordem_excel', ordem_id=ordem.id) }}" class="btn btn-success">
+            <i class="bi bi-file-excel"></i> Exportar Excel
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

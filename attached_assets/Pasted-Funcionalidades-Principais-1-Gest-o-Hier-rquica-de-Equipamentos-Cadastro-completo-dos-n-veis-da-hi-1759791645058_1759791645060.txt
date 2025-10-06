@@ -1,0 +1,122 @@
+Funcionalidades Principais
+1. Gestão Hierárquica de Equipamentos
+
+Cadastro completo dos níveis da hierarquia: Empresa → Setor → Área → Conjunto → Subconjunto → Equipamento.
+
+Cada equipamento pode ser vinculado a planos de inspeção específicos.
+
+2. Planos de Inspeção
+
+Campos do plano:
+
+Título do Plano
+
+Equipamento vinculado
+
+Data de criação
+
+Tipo de geração: por frequência (horas, dias) ou por data de abertura
+
+Frequência ou intervalo de inspeção
+
+Data de início
+
+Cada plano possui itens de inspeção:
+
+Tipo: Visual ou Sensitiva
+
+Resultado esperado: Conforme / Não Conforme / N/A
+
+Observações
+
+Valores numéricos: mínimo, máximo e atual
+
+Campos de não conformidade (exibidos apenas se o item for "Não Conforme"):
+
+Falha
+
+Solução
+
+Tempo necessário
+
+Quantidade de executantes
+
+Materiais necessários
+
+Outros
+
+3. Ordens de Execução
+
+Geração de ordens automáticas com base no plano e frequência definida.
+
+Cada ordem é atribuída a um executante.
+
+Status da ordem: pendente, em andamento, concluída.
+
+Executante realiza o apontamento dos itens:
+
+Marcação de resultado (Conforme / Não Conforme / N/A)
+
+Preenchimento de campos de não conformidade, se aplicável.
+
+4. Relatórios e Análises
+
+Relatórios detalhados por:
+
+Plano
+
+Ordem de execução
+
+Equipamento / Subconjunto / Conjunto / Área / Setor / Empresa
+
+Estatísticas:
+
+Quantidade de itens conforme, não conforme e N/A
+
+Histórico de ordens concluídas, pendentes ou em andamento
+
+Exportação:
+
+PDF com tabelas e não conformidades
+
+Excel para análise externa
+
+Dashboard com gráficos:
+
+Pizza: proporção de itens conforme / não conforme / N/A
+
+Barras: quantidade de ordens por status e executante
+
+Linha: evolução das inspeções ao longo do tempo
+
+5. Interface Web
+
+Layout responsivo com Bootstrap
+
+Navbar para acesso rápido a Empresas, Planos, Ordens e Relatórios
+
+Formulários claros para cadastro de itens, planos e ordens
+
+Modal ou campos dinâmicos para exibir não conformidades quando necessário
+
+Checklist interativo para execução de inspeção
+
+6. Usuários e Segurança
+
+Papéis:
+
+Administrador: criação e edição de planos, ordens, equipamentos e relatórios
+
+Executante: visualização e apontamento das ordens
+
+Autenticação (login/senha) e controle de permissões por função
+
+7. Extras
+
+Integração com JavaScript para checklist dinâmico
+
+Dashboard com gráficos Chart.js
+
+Sistema pronto para Replit com banco PostgreSQL
+
+Código organizado em modelos, rotas, templates e utilitários para exportação

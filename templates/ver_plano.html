@@ -45,6 +45,13 @@
                 <a href="{{ url_for('main.editar_plano', plano_id=plano.id) }}" class="btn btn-warning mb-2 w-100">
                     <i class="bi bi-pencil"></i> Editar Plano
                 </a>
+                
+                {% if current_user.is_admin() %}
+                <button type="button" class="btn btn-primary mb-2 w-100" data-bs-toggle="modal" data-bs-target="#modalGerarOrdem">
+                    <i class="bi bi-plus-circle"></i> Gerar Ordem Automática
+                </button>
+                {% endif %}
+                
                 <a href="{{ url_for('main.relatorio_plano_pdf', plano_id=plano.id) }}" class="btn btn-danger mb-2 w-100" target="_blank">
                     <i class="bi bi-file-pdf"></i> Exportar PDF
                 </a>
@@ -103,6 +110,36 @@
         <a href="{{ url_for('main.planos') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Voltar para Planos
         </a>
+    </div>
+</div>
+
+<div class="modal fade" id="modalGerarOrdem" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('main.gerar_ordem_automatica', plano_id=plano.id) }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gerar Ordem Automática</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Plano: <strong>{{ plano.titulo }}</strong></p>
+                    <p class="text-muted">A data será calculada automaticamente baseada na frequência do plano.</p>
+                    <div class="mb-3">
+                        <label for="executante_id" class="form-label">Executante</label>
+                        <select class="form-select" id="executante_id" name="executante_id" required>
+                            <option value="">Selecione um executante</option>
+                            {% for user in User.query.all() %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Gerar Ordem</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
