@@ -84,12 +84,26 @@
                             {% for item in plano.itens %}
                             <tr>
                                 <td>{{ loop.index }}</td>
-                                <td>{{ item.descricao }}</td>
+                                <td>
+                                    <strong>{{ item.descricao }}</strong>
+                                    {% if item.observacao %}
+                                    <br><small class="text-muted">{{ item.observacao }}</small>
+                                    {% endif %}
+                                    {% if item.tipo == 'medicoes' and (item.valor_min or item.valor_max) %}
+                                    <br><small class="text-info">
+                                        <i class="bi bi-speedometer2"></i> 
+                                        Min: {{ item.valor_min if item.valor_min else '-' }} | 
+                                        Max: {{ item.valor_max if item.valor_max else '-' }}
+                                    </small>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if item.tipo == 'visual' %}
                                     <span class="badge bg-info">Visual</span>
                                     {% elif item.tipo == 'sensitiva' %}
                                     <span class="badge bg-warning">Sensitiva</span>
+                                    {% elif item.tipo == 'medicoes' %}
+                                    <span class="badge bg-success">Medições</span>
                                     {% endif %}
                                 </td>
                             </tr>

@@ -38,9 +38,26 @@
                     <div class="card mb-3 item-inspecao" id="card-item-{{ item.id }}">
                         <div class="card-header bg-light">
                             <strong>{{ loop.index }}. {{ item.descricao }}</strong>
-                            <span class="badge bg-{{ 'info' if item.tipo == 'visual' else 'warning' }}">{{ item.tipo|title }}</span>
+                            {% if item.tipo == 'visual' %}
+                            <span class="badge bg-info">Visual</span>
+                            {% elif item.tipo == 'sensitiva' %}
+                            <span class="badge bg-warning">Sensitiva</span>
+                            {% elif item.tipo == 'medicoes' %}
+                            <span class="badge bg-success">Medições</span>
+                            {% endif %}
+                            {% if item.observacao %}
+                            <br><small class="text-muted mt-1">{{ item.observacao }}</small>
+                            {% endif %}
                         </div>
                         <div class="card-body">
+                            {% if item.tipo == 'medicoes' and (item.valor_min or item.valor_max) %}
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-speedometer2"></i> <strong>Valores de Referência:</strong><br>
+                                Mínimo: <strong>{{ item.valor_min if item.valor_min else '-' }}</strong> | 
+                                Máximo: <strong>{{ item.valor_max if item.valor_max else '-' }}</strong>
+                            </div>
+                            {% endif %}
+                            
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -60,14 +77,23 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            {% if item.tipo == 'medicoes' %}
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="mb-3">
-                                        <label class="form-label">Valor Atual (numérico, se aplicável)</label>
-                                        <input type="number" step="0.01" class="form-control" name="valor_atual_{{ item.id }}" placeholder="Ex: 25.5">
+                                        <label class="form-label">Valor Medido <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="valor_atual_{{ item.id }}" 
+                                               id="valor_atual_{{ item.id }}" placeholder="Digite o valor medido" 
+                                               data-min="{{ item.valor_min }}" data-max="{{ item.valor_max }}"
+                                               onchange="validarValorMedicao({{ item.id }})" required>
+                                        <div id="alerta-valor-{{ item.id }}" class="text-danger mt-1" style="display: none;">
+                                            <small><i class="bi bi-exclamation-triangle"></i> Valor fora dos limites estabelecidos!</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
                             
                             <div class="nao-conformidade-fields" id="nao-conformidade-{{ item.id }}" style="display: none;">
                                 <hr>
@@ -163,6 +189,43 @@ function toggleNaoConformidade(itemId) {
         card.classList.add('border-success');
     } else {
         card.classList.remove('border-success');
+    }
+}
+
+function validarValorMedicao(itemId) {
+    const input = document.getElementById('valor_atual_' + itemId);
+    const alerta = document.getElementById('alerta-valor-' + itemId);
+    
+    if (!input) return;
+    
+    const valor = parseFloat(input.value);
+    const min = parseFloat(input.dataset.min);
+    const max = parseFloat(input.dataset.max);
+    
+    if (isNaN(valor)) {
+        alerta.style.display = 'none';
+        input.classList.remove('border-danger', 'border-warning');
+        return;
+    }
+    
+    let foraDosLimites = false;
+    
+    if (!isNaN(min) && valor < min) {
+        foraDosLimites = true;
+    }
+    
+    if (!isNaN(max) && valor > max) {
+        foraDosLimites = true;
+    }
+    
+    if (foraDosLimites) {
+        alerta.style.display = 'block';
+        input.classList.add('border-warning');
+        input.classList.remove('border-success');
+    } else {
+        alerta.style.display = 'none';
+        input.classList.remove('border-warning');
+        input.classList.add('border-success');
     }
 }
 </script>

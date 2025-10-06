@@ -66,18 +66,28 @@
                 <th>Item</th>
                 <th>Tipo</th>
                 <th>Resultado</th>
+                <th>Valor Medido</th>
                 <th>Observação</th>
                 <th>Falha</th>
                 <th>Solução</th>
             </tr>
         </thead>
         <tbody>
-            {% for apontamento in ordem.apontamentos %}
+            {% for apontamento in ordem.itens_apontados %}
             <tr class="{% if apontamento.resultado == 'conforme' %}conforme{% elif apontamento.resultado == 'nao_conforme' %}nao-conforme{% else %}na{% endif %}">
                 <td>{{ loop.index }}</td>
-                <td>{{ apontamento.item_inspecao.descricao }}</td>
+                <td>
+                    {{ apontamento.item_inspecao.descricao }}
+                    {% if apontamento.item_inspecao.tipo == 'medicoes' and (apontamento.item_inspecao.valor_min or apontamento.item_inspecao.valor_max) %}
+                    <br><small style="color: #6c757d;">
+                        Ref: Min {{ apontamento.item_inspecao.valor_min if apontamento.item_inspecao.valor_min else '-' }} | 
+                        Max {{ apontamento.item_inspecao.valor_max if apontamento.item_inspecao.valor_max else '-' }}
+                    </small>
+                    {% endif %}
+                </td>
                 <td>{{ apontamento.item_inspecao.tipo or '-' }}</td>
                 <td>{{ apontamento.resultado or '-' }}</td>
+                <td>{{ apontamento.valor_atual if apontamento.valor_atual else '-' }}</td>
                 <td>{{ apontamento.observacao or '-' }}</td>
                 <td>{{ apontamento.falha or '-' }}</td>
                 <td>{{ apontamento.solucao or '-' }}</td>
