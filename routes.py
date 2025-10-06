@@ -476,18 +476,9 @@ def relatorio_plano_excel(plano_id):
     for item in plano.itens:
         data.append({
             'Descrição': item.descricao,
-            'Tipo': item.tipo,
-            'Resultado': item.resultado,
-            'Observação': item.observacao,
-            'Valor Mín': item.valor_min,
-            'Valor Máx': item.valor_max,
-            'Valor Atual': item.valor_atual,
-            'Falha': item.falha,
-            'Solução': item.solucao,
-            'Tempo Necessário (h)': item.tempo_necessario,
-            'Qtd Executantes': item.qtde_executantes,
-            'Materiais': item.materiais,
-            'Outros': item.outros
+            'Tipo': item.tipo or '-',
+            'Valor Mínimo': item.valor_min or '-',
+            'Valor Máximo': item.valor_max or '-'
         })
     
     df = pd.DataFrame(data)
