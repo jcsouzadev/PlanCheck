@@ -1,0 +1,242 @@
+# === PlanCheck - Sistema completo de Planos de Manutenção e Inspeção ===
+
+# --- app.py ---
+from flask import Flask
+from config import Config
+from flask_migrate import Migrate
+from models import db, login_manager
+from routes import main_bp
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    db.init_app(app)
+    login_manager.init_app(app)
+
+    migrate = Migrate(app, db)
+
+    app.register_blueprint(main_bp)
+
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(host='0.0.0.0', port=3000, debug=True)
+
+# --- config.py ---
+import os
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev_secret')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///dev.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# --- models.py ---
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin, LoginManager
+from datetime import datetime
+
+db = SQLAlchemy()
+login_manager = LoginManager()
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class Empresa(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    setores = db.relationship('Setor', backref='empresa', cascade='all, delete-orphan')
+
+class Setor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    empresa_id = db.Column(db.Integer, db.ForeignKey('empresa.id'))
+    areas = db.relationship('Area', backref='setor', cascade='all, delete-orphan')
+
+class Area(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    setor_id = db.Column(db.Integer, db.ForeignKey('setor.id'))
+    conjuntos = db.relationship('Conjunto', backref='area', cascade='all, delete-orphan')
+
+class Conjunto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    area_id = db.Column(db.Integer, db.ForeignKey('area.id'))
+    subconjuntos = db.relationship('Subconjunto', backref='conjunto', cascade='all, delete-orphan')
+
+class Subconjunto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    conjunto_id = db.Column(db.Integer, db.ForeignKey('conjunto.id'))
+    equipamentos = db.relationship('Equipamento', backref='subconjunto', cascade='all, delete-orphan')
+
+class Equipamento(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    codigo = db.Column(db.String(50))
+    subconjunto_id = db.Column(db.Integer, db.ForeignKey('subconjunto.id'))
+    planos = db.relationship('PlanoInspecao', backref='equipamento', cascade='all, delete-orphan')
+
+class PlanoInspecao(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    equipamento_id = db.Column(db.Integer, db.ForeignKey('equipamento.id'))
+
+    tipo_geracao = db.Column(db.String(50))  # 'horario', 'diario', 'data_abertura'
+    frequencia = db.Column(db.Float)
+    data_inicio = db.Column(db.DateTime)
+
+    itens = db.relationship('ItemInspecao', backref='plano', cascade='all, delete-orphan')
+    ordens = db.relationship('OrdemExecucao', backref='plano', cascade='all, delete-orphan')
+
+class ItemInspecao(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    descricao = db.Column(db.String(255), nullable=False)
+    tipo = db.Column(db.String(50))
+    resultado = db.Column(db.String(50))  # Conforme / Não conforme / N/A
+    observacao = db.Column(db.Text)
+    valor_min = db.Column(db.Float)
+    valor_max = db.Column(db.Float)
+    valor_atual = db.Column(db.Float)
+    plano_id = db.Column(db.Integer, db.ForeignKey('plano_inspecao.id'))
+
+    falha = db.Column(db.Text)
+    solucao = db.Column(db.Text)
+    tempo_necessario = db.Column(db.Float)
+    qtde_executantes = db.Column(db.Integer)
+    materiais = db.Column(db.Text)
+    outros = db.Column(db.Text)
+
+class OrdemExecucao(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    plano_id = db.Column(db.Integer, db.ForeignKey('plano_inspecao.id'), nullable=False)
+    executante_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    data_programada = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(50), default='pendente')  # pendente / em andamento / concluído
+    itens_apontados = db.relationship('ItemInspecaoApontado', backref='ordem', cascade='all, delete-orphan')
+
+class ItemInspecaoApontado(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item_inspecao_id = db.Column(db.Integer, db.ForeignKey('item_inspecao.id'), nullable=False)
+    ordem_id = db.Column(db.Integer, db.ForeignKey('ordem_execucao.id'), nullable=False)
+    resultado = db.Column(db.String(50))
+    observacao = db.Column(db.Text)
+    valor_atual = db.Column(db.Float)
+
+    falha = db.Column(db.Text)
+    solucao = db.Column(db.Text)
+    tempo_necessario = db.Column(db.Float)
+    qtde_executantes = db.Column(db.Integer)
+    materiais = db.Column(db.Text)
+    outros = db.Column(db.Text)
+
+# --- utils.py ---
+from flask import render_template, make_response
+import pandas as pd
+from io import BytesIO
+from weasyprint import HTML
+
+def gerar_pdf(template, **kwargs):
+    html_out = render_template(template, **kwargs)
+    pdf = HTML(string=html_out).write_pdf()
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=relatorio.pdf'
+    return response
+
+def gerar_excel(dataframe, filename='relatorio.xlsx'):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        dataframe.to_excel(writer, index=False)
+    output.seek(0)
+    response = make_response(output.read())
+    response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+    return response
+
+# --- routes.py ---
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from models import *
+from utils import gerar_pdf, gerar_excel
+from datetime import datetime
+
+main_bp = Blueprint('main', __name__)
+
+# Rotas completas de CRUD de Empresas, Planos, Itens, Ordens e Relatórios
+@main_bp.route('/')
+def index():
+    empresas = Empresa.query.all()
+    return render_template('index.html', empresas=empresas)
+
+# --- Exemplos de rotas detalhadas ---
+@main_bp.route('/empresas', methods=['GET','POST'])
+def empresas():
+    if request.method=='POST':
+        nome=request.form.get('nome')
+        if nome:
+            db.session.add(Empresa(nome=nome))
+            db.session.commit()
+            flash('Empresa criada com sucesso')
+        return redirect(url_for('main.empresas'))
+    empresas=Empresa.query.all()
+    return render_template('empresas.html', empresas=empresas)
+
+@main_bp.route('/planos', methods=['GET','POST'])
+def planos():
+    if request.method=='POST':
+        titulo=request.form.get('titulo')
+        equipamento_id=request.form.get('equipamento_id')
+        tipo_geracao=request.form.get('tipo_geracao')
+        frequencia=request.form.get('frequencia')
+        data_inicio=request.form.get('data_inicio')
+        plano=PlanoInspecao(titulo=titulo, equipamento_id=equipamento_id, tipo_geracao=tipo_geracao,
+                             frequencia=frequencia, data_inicio=datetime.strptime(data_inicio,'%Y-%m-%d') if data_inicio else None)
+        db.session.add(plano)
+        db.session.commit()
+        flash('Plano criado com sucesso')
+        return redirect(url_for('main.planos'))
+    planos=PlanoInspecao.query.all()
+    equipamentos=Equipamento.query.all()
+    return render_template('planos.html', planos=planos, equipamentos=equipamentos)
+
+@main_bp.route('/ordens', methods=['GET'])
+def ordens():
+    ordens=OrdemExecucao.query.all()
+    return render_template('ordens.html', ordens=ordens)
+
+@main_bp.route('/relatorios/planos/<int:plano_id>/pdf')
+def relatorio_plano_pdf(plano_id):
+    plano=PlanoInspecao.query.get_or_404(plano_id)
+    return gerar_pdf('relatorio_plano.html', plano=plano)
+
+@main_bp.route('/relatorios/planos/<int:plano_id>/excel')
+def relatorio_plano_excel(plano_id):
+    plano=PlanoInspecao.query.get_or_404(plano_id)
+    data=[]
+    for item in plano.itens:
+        data.append({
+            'Descricao': item.descricao,
+            'Tipo': item.tipo,
+            'Resultado': item.resultado,
+            'Observacao': item.observacao,
+            'Valor Min': item.valor_min,
+            'Valor Max': item.valor_max,
+            'Valor Atual': item.valor_atual,
+            'Falha': item.falha,
+            'Solucao': item.solucao,
+            'Tempo Necessario': item.tempo_necessario,
+            'Qtde Executantes': item.qtde_executantes,
+            'Materiais': item.materiais,
+            'Outros': item.outros
+        })
+    df=pd.DataFrame(data)
+    return gerar_excel(df, filename=f'relatorio_plano_{plano_id}.xlsx')
