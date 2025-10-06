@@ -43,7 +43,10 @@ Sistema web completo para gestão de planos de manutenção e inspeção de equi
 - Criação de planos vinculados a equipamentos
 - Tipos de geração: por hora, diário ou data de abertura
 - Definição de frequência e data de início
-- Itens de inspeção (Visual ou Sensitiva)
+- **Três tipos de itens inspecionais:**
+  - **Visual**: Inspeção por visualização
+  - **Sensitiva**: Inspeção por toque, som, vibração
+  - **Medições/Grandezas**: Valores numéricos com limites min/max configuráveis
 
 ### 3. Ordens de Execução
 - Geração de ordens vinculadas a planos
