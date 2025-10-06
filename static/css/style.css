@@ -1,46 +1,109 @@
+/* Paleta de Cores - Pentire Cool Summer Day */
+:root {
+    --primary-color: #295673;      /* Azul petróleo escuro */
+    --secondary-color: #C7D7E4;    /* Azul claro acinzentado */
+    --accent-color: #7AAD6B;       /* Verde suave */
+    --bg-light: #F2EBF3;           /* Lavanda muito claro */
+    --bg-white: #ffffff;
+    --text-dark: #2c3e50;
+    --border-color: #C7D7E4;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    background-color: var(--bg-light);
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand {
     font-weight: bold;
     font-size: 1.5rem;
+    color: white !important;
 }
 
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.navbar .nav-link:hover {
+    color: white !important;
+}
+
+/* Cards */
 .card {
     border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    box-shadow: 0 0.125rem 0.25rem rgba(41, 86, 115, 0.1);
     margin-bottom: 1rem;
+    background-color: var(--bg-white);
 }
 
 .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-}
-
-.table th {
-    background-color: #f8f9fa;
+    background-color: var(--secondary-color);
+    border-bottom: 2px solid var(--border-color);
+    color: var(--primary-color);
     font-weight: 600;
 }
 
-.accordion-button:not(.collapsed) {
-    background-color: #e7f1ff;
-    color: #0c63e4;
+/* Tabelas */
+.table th {
+    background-color: var(--secondary-color);
+    font-weight: 600;
+    color: var(--primary-color);
 }
 
+/* Botões Primários */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #1e4456;
+    border-color: #1e4456;
+}
+
+/* Botões de Sucesso */
+.btn-success {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-success:hover {
+    background-color: #659957;
+    border-color: #659957;
+}
+
+/* Accordion */
+.accordion-button:not(.collapsed) {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.accordion-button:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(41, 86, 115, 0.25);
+}
+
+/* Itens de Inspeção */
 .item-inspecao {
     transition: all 0.3s ease;
+    background-color: var(--bg-white);
 }
 
 .item-inspecao.border-success {
-    border-left: 4px solid #28a745 !important;
+    border-left: 4px solid var(--accent-color) !important;
 }
 
 .item-inspecao.border-danger {
     border-left: 4px solid #dc3545 !important;
 }
 
+/* Campos de Não Conformidade */
 .nao-conformidade-fields {
     background-color: #fff3cd;
     padding: 15px;
@@ -48,13 +111,70 @@ body {
     border-left: 4px solid #ffc107;
 }
 
+/* Badges */
+.badge.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--accent-color) !important;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+}
+
+a:hover {
+    color: #1e4456;
+}
+
+/* Inputs com foco */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(41, 86, 115, 0.25);
+}
+
+/* Botões com animação */
 .btn {
     transition: all 0.2s ease;
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(41, 86, 115, 0.2);
+}
+
+/* Alertas customizados */
+.alert-info {
+    background-color: var(--secondary-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+.dashboard-card.success {
+    border-left-color: var(--accent-color);
+}
+
+.dashboard-card.warning {
+    border-left-color: #ffc107;
+}
+
+/* Validação de medição */
+.medicao-valid {
+    border: 2px solid var(--accent-color) !important;
+    background-color: rgba(122, 173, 107, 0.1);
+}
+
+.medicao-invalid {
+    border: 2px solid #ffc107 !important;
+    background-color: rgba(255, 193, 7, 0.1);
 }
 
 @media print {
