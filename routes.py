@@ -74,6 +74,20 @@ def empresas():
     empresas = Empresa.query.order_by(Empresa.nome).all()
     return render_template('empresas.html', empresas=empresas)
 
+@main_bp.route('/empresas/<int:empresa_id>/editar', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def editar_empresa(empresa_id):
+    empresa = Empresa.query.get_or_404(empresa_id)
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        if nome:
+            empresa.nome = nome
+            db.session.commit()
+            flash('Empresa atualizada com sucesso!', 'success')
+            return redirect(url_for('main.empresas'))
+    return render_template('editar_empresa.html', empresa=empresa)
+
 @main_bp.route('/empresas/<int:empresa_id>/delete', methods=['POST'])
 @login_required
 @admin_required
@@ -103,6 +117,29 @@ def ver_empresa(empresa_id):
     empresa = Empresa.query.get_or_404(empresa_id)
     return render_template('ver_empresa.html', empresa=empresa)
 
+@main_bp.route('/setores/<int:setor_id>/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_setor(setor_id):
+    setor = Setor.query.get_or_404(setor_id)
+    nome = request.form.get('nome')
+    if nome:
+        setor.nome = nome
+        db.session.commit()
+        flash('Setor atualizado com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=setor.empresa_id))
+
+@main_bp.route('/setores/<int:setor_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def deletar_setor(setor_id):
+    setor = Setor.query.get_or_404(setor_id)
+    empresa_id = setor.empresa_id
+    db.session.delete(setor)
+    db.session.commit()
+    flash('Setor excluído com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=empresa_id))
+
 @main_bp.route('/setores/<int:setor_id>/area', methods=['POST'])
 @login_required
 @admin_required
@@ -115,6 +152,29 @@ def adicionar_area(setor_id):
         db.session.commit()
         flash('Área adicionada com sucesso!', 'success')
     return redirect(url_for('main.ver_empresa', empresa_id=setor.empresa_id))
+
+@main_bp.route('/areas/<int:area_id>/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_area(area_id):
+    area = Area.query.get_or_404(area_id)
+    nome = request.form.get('nome')
+    if nome:
+        area.nome = nome
+        db.session.commit()
+        flash('Área atualizada com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=area.setor.empresa_id))
+
+@main_bp.route('/areas/<int:area_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def deletar_area(area_id):
+    area = Area.query.get_or_404(area_id)
+    empresa_id = area.setor.empresa_id
+    db.session.delete(area)
+    db.session.commit()
+    flash('Área excluída com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=empresa_id))
 
 @main_bp.route('/areas/<int:area_id>/conjunto', methods=['POST'])
 @login_required
@@ -129,6 +189,29 @@ def adicionar_conjunto(area_id):
         flash('Conjunto adicionado com sucesso!', 'success')
     return redirect(url_for('main.ver_empresa', empresa_id=area.setor.empresa_id))
 
+@main_bp.route('/conjuntos/<int:conjunto_id>/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_conjunto(conjunto_id):
+    conjunto = Conjunto.query.get_or_404(conjunto_id)
+    nome = request.form.get('nome')
+    if nome:
+        conjunto.nome = nome
+        db.session.commit()
+        flash('Conjunto atualizado com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=conjunto.area.setor.empresa_id))
+
+@main_bp.route('/conjuntos/<int:conjunto_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def deletar_conjunto(conjunto_id):
+    conjunto = Conjunto.query.get_or_404(conjunto_id)
+    empresa_id = conjunto.area.setor.empresa_id
+    db.session.delete(conjunto)
+    db.session.commit()
+    flash('Conjunto excluído com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=empresa_id))
+
 @main_bp.route('/conjuntos/<int:conjunto_id>/subconjunto', methods=['POST'])
 @login_required
 @admin_required
@@ -141,6 +224,29 @@ def adicionar_subconjunto(conjunto_id):
         db.session.commit()
         flash('Subconjunto adicionado com sucesso!', 'success')
     return redirect(url_for('main.ver_empresa', empresa_id=conjunto.area.setor.empresa_id))
+
+@main_bp.route('/subconjuntos/<int:subconjunto_id>/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_subconjunto(subconjunto_id):
+    subconjunto = Subconjunto.query.get_or_404(subconjunto_id)
+    nome = request.form.get('nome')
+    if nome:
+        subconjunto.nome = nome
+        db.session.commit()
+        flash('Subconjunto atualizado com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=subconjunto.conjunto.area.setor.empresa_id))
+
+@main_bp.route('/subconjuntos/<int:subconjunto_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def deletar_subconjunto(subconjunto_id):
+    subconjunto = Subconjunto.query.get_or_404(subconjunto_id)
+    empresa_id = subconjunto.conjunto.area.setor.empresa_id
+    db.session.delete(subconjunto)
+    db.session.commit()
+    flash('Subconjunto excluído com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=empresa_id))
 
 @main_bp.route('/subconjuntos/<int:subconjunto_id>/equipamento', methods=['POST'])
 @login_required
@@ -155,6 +261,31 @@ def adicionar_equipamento(subconjunto_id):
         db.session.commit()
         flash('Equipamento adicionado com sucesso!', 'success')
     return redirect(url_for('main.ver_empresa', empresa_id=subconjunto.conjunto.area.setor.empresa_id))
+
+@main_bp.route('/equipamentos/<int:equipamento_id>/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_equipamento(equipamento_id):
+    equipamento = Equipamento.query.get_or_404(equipamento_id)
+    nome = request.form.get('nome')
+    codigo = request.form.get('codigo')
+    if nome:
+        equipamento.nome = nome
+        equipamento.codigo = codigo
+        db.session.commit()
+        flash('Equipamento atualizado com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=equipamento.subconjunto.conjunto.area.setor.empresa_id))
+
+@main_bp.route('/equipamentos/<int:equipamento_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def deletar_equipamento(equipamento_id):
+    equipamento = Equipamento.query.get_or_404(equipamento_id)
+    empresa_id = equipamento.subconjunto.conjunto.area.setor.empresa_id
+    db.session.delete(equipamento)
+    db.session.commit()
+    flash('Equipamento excluído com sucesso!', 'success')
+    return redirect(url_for('main.ver_empresa', empresa_id=empresa_id))
 
 @main_bp.route('/planos', methods=['GET', 'POST'])
 @login_required
