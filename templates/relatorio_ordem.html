@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório de Ordem #{{ ordem.id }}</title>
+    <title>Ordem de Serviço Nº {{ ordem.id }}</title>
     <style>
         @page {
             size: A4;
@@ -140,7 +140,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Relatório de Ordem de Execução #{{ ordem.id }}</h1>
+        <h1>Ordem de Serviço Nº {{ ordem.id }}</h1>
         {% if ordem.plano and ordem.plano.equipamento and ordem.plano.equipamento.subconjunto and ordem.plano.equipamento.subconjunto.conjunto and ordem.plano.equipamento.subconjunto.conjunto.area and ordem.plano.equipamento.subconjunto.conjunto.area.setor and ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa %}
         <div class="empresa">{{ ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa.nome }}</div>
         {% endif %}
