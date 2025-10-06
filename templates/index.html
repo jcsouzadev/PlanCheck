@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     labels: ['Conforme', 'Não Conforme', 'N/A'],
                     datasets: [{
                         data: [data.itens.conformes, data.itens.nao_conformes, data.itens.na],
-                        backgroundColor: ['#28a745', '#dc3545', '#6c757d']
+                        backgroundColor: ['#7AAD6B', '#dc3545', '#C7D7E4']
                     }]
                 },
                 options: {
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: 'Ordens',
                         data: [data.ordens.pendentes, data.ordens.em_andamento, data.ordens.concluidas],
-                        backgroundColor: ['#ffc107', '#17a2b8', '#28a745']
+                        backgroundColor: ['#ffc107', '#295673', '#7AAD6B']
                     }]
                 },
                 options: {
@@ -164,8 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: 'Itens Conformes',
                         data: data.temporal.conformes.reverse(),
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderColor: '#7AAD6B',
+                        backgroundColor: 'rgba(122, 173, 107, 0.1)',
                         tension: 0.4,
                         fill: true
                     }, {
