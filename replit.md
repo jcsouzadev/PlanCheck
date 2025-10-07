@@ -97,6 +97,34 @@ Os campos de não conformidade aparecem automaticamente quando um item é marcad
 - Chart.js 4.4.0
 - JavaScript Vanilla
 
+## Paleta de Cores
+
+**Pentire Cool Summer Day** - Paleta customizada aplicada em outubro de 2025:
+
+- **#295673** - Azul petróleo escuro (cor principal)
+  - Usado em: Navbar, botões primários, cabeçalhos, títulos de relatórios
+  
+- **#7AAD6B** - Verde suave (destaque/sucesso)
+  - Usado em: Itens conformes, status "Concluída", gráficos de sucesso
+  
+- **#C7D7E4** - Azul claro acinzentado (secundária)
+  - Usado em: Cabeçalhos de cards, fundos de tabelas, itens N/A
+  
+- **#F2EBF3** - Lavanda muito claro (fundos suaves)
+  - Usado em: Fundo do body, caixas de informação em relatórios
+
+- **#FFC107** - Amarelo (avisos)
+  - Usado em: Status "Pendente", alertas, medições fora da faixa
+
+- **#DC3545** - Vermelho (perigo/erro)
+  - Usado em: Itens não conformes, erros, validações
+
+A paleta foi aplicada de forma consistente em:
+- Todas as páginas HTML (login, dashboard, formulários)
+- Gráficos do Chart.js (pizza, barras, linha temporal)
+- Relatórios PDF (cabeçalhos, tabelas, badges)
+- Classes utilitárias do Bootstrap (.bg-*, .text-*, .btn-*)
+
 ## Credenciais de Acesso
 
 ### Administrador
@@ -205,4 +233,4 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 ✅ Sistema rodando na porta 5000
 
 ## Última Atualização
-06 de outubro de 2025
+07 de outubro de 2025 - Implementada nova paleta de cores "Pentire Cool Summer Day"

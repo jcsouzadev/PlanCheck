@@ -58,24 +58,41 @@ body {
 
 /* Botões Primários */
 .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
 }
 
 .btn-primary:hover {
-    background-color: #1e4456;
-    border-color: #1e4456;
+    background-color: #1e4456 !important;
+    border-color: #1e4456 !important;
+}
+
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(41, 86, 115, 0.5) !important;
 }
 
 /* Botões de Sucesso */
 .btn-success {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #1e3a1e !important;
 }
 
 .btn-success:hover {
-    background-color: #659957;
-    border-color: #659957;
+    background-color: #659957 !important;
+    border-color: #659957 !important;
+    color: #0f1b0f !important;
+}
+
+.btn-success:focus,
+.btn-success:active {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #1e3a1e !important;
+    box-shadow: 0 0 0 0.25rem rgba(122, 173, 107, 0.5) !important;
 }
 
 /* Accordion */
@@ -111,6 +128,31 @@ body {
     border-left: 4px solid #ffc107;
 }
 
+/* Bootstrap Utility Classes - Background Colors */
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--accent-color) !important;
+    color: #1e3a1e !important;
+}
+
+.bg-info {
+    background-color: var(--secondary-color) !important;
+    color: var(--text-dark) !important;
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color) !important;
+    color: var(--text-dark) !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: #664d03 !important;
+}
+
 /* Badges */
 .badge.bg-primary {
     background-color: var(--primary-color) !important;
@@ -118,6 +160,35 @@ body {
 
 .badge.bg-success {
     background-color: var(--accent-color) !important;
+    color: #1e3a1e !important;
+}
+
+.badge.bg-info {
+    background-color: var(--secondary-color) !important;
+    color: var(--text-dark) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--secondary-color) !important;
+    color: var(--text-dark) !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #664d03 !important;
+}
+
+/* Bootstrap Text Color Utilities */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-success {
+    color: #35693F !important;
+}
+
+.text-info {
+    color: var(--primary-color) !important;
 }
 
 /* Links */
@@ -132,8 +203,8 @@ a:hover {
 /* Inputs com foco */
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(41, 86, 115, 0.25);
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(41, 86, 115, 0.25) !important;
 }
 
 /* Botões com animação */
