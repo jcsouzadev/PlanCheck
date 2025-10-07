@@ -20,13 +20,13 @@ def admin_required(f):
 @main_bp.route('/')
 def index():
     if current_user.is_authenticated:
-        total_empresas = Empresa.query.count()
+        total_equipamentos = Equipamento.query.count()
         total_planos = PlanoInspecao.query.count()
         total_ordens = OrdemExecucao.query.count()
         ordens_pendentes = OrdemExecucao.query.filter_by(status='pendente').count()
         
         return render_template('index.html', 
-                             total_empresas=total_empresas,
+                             total_equipamentos=total_equipamentos,
                              total_planos=total_planos,
                              total_ordens=total_ordens,
                              ordens_pendentes=ordens_pendentes)
