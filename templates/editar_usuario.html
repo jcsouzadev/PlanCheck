@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Novo Usuário' if not usuario else 'Editar Usuário' }} - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>
+                <i class="bi bi-person-{{ 'plus' if not usuario else 'gear' }} me-2"></i>
+                {{ 'Novo Usuário' if not usuario else 'Editar Usuário' }}
+            </h2>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('main.usuarios') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nome" class="form-label">Nome Completo *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="nome" 
+                               name="nome" 
+                               value="{{ usuario.nome if usuario else '' }}"
+                               required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="matricula" class="form-label">Matrícula *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="matricula" 
+                               name="matricula" 
+                               value="{{ usuario.matricula if usuario else '' }}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="funcao" class="form-label">Função *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="funcao" 
+                               name="funcao" 
+                               value="{{ usuario.funcao if usuario else '' }}"
+                               placeholder="Ex: Técnico de Manutenção, Engenheiro, etc."
+                               required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="perfil_acesso" class="form-label">Perfil de Acesso *</label>
+                        <select class="form-select" id="perfil_acesso" name="perfil_acesso" required>
+                            <option value="">Selecione...</option>
+                            <option value="administrador" {{ 'selected' if usuario and usuario.perfil_acesso == 'administrador' else '' }}>
+                                Administrador
+                            </option>
+                            <option value="executante" {{ 'selected' if usuario and usuario.perfil_acesso == 'executante' else '' }}>
+                                Executante
+                            </option>
+                        </select>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> Administrador: acesso total | Executante: execução de ordens
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="area" class="form-label">Área</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="area" 
+                               name="area" 
+                               value="{{ usuario.area if usuario else '' }}"
+                               placeholder="Ex: Operações, Manutenção, etc.">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="setor" class="form-label">Setor</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="setor" 
+                               name="setor" 
+                               value="{{ usuario.setor if usuario else '' }}"
+                               placeholder="Ex: Industrial, Elétrica, etc.">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="mb-3">
+                    <i class="bi bi-key me-2"></i>Credenciais de Acesso
+                </h5>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Nome de Usuário *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               value="{{ usuario.username if usuario else '' }}"
+                               required>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> Será usado para login no sistema
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">
+                            Senha {{ '(deixe em branco para manter a atual)' if usuario else '*' }}
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               {{ 'required' if not usuario else '' }}
+                               minlength="6">
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> Mínimo de 6 caracteres
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        {{ 'Criar Usuário' if not usuario else 'Salvar Alterações' }}
+                    </button>
+                    <a href="{{ url_for('main.usuarios') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if usuario %}
+    <div class="row mt-4">
+        <div class="col">
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Atenção:</strong> Ao alterar o perfil de acesso ou credenciais, o usuário {{ usuario.nome }} será afetado imediatamente.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
