@@ -123,42 +123,54 @@
 <div class="row mt-3">
     <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-list-task"></i> Lista de Ordens</h5>
-                <div class="d-flex gap-2">
-                    <input type="date" id="dataInicio" class="form-control form-control-sm" style="width: 150px;">
-                    <input type="date" id="dataFim" class="form-control form-control-sm" style="width: 150px;">
-                    <button class="btn btn-primary btn-sm" onclick="filtrarOrdens()">
-                        <i class="bi bi-funnel"></i> Filtrar
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="limparFiltros()">
-                        <i class="bi bi-x-circle"></i> Limpar
-                    </button>
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                    <h5 class="mb-0"><i class="bi bi-list-task"></i> Lista de Ordens</h5>
+                    <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+                        <input type="date" id="dataInicio" class="form-control form-control-sm">
+                        <input type="date" id="dataFim" class="form-control form-control-sm">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm flex-grow-1" onclick="filtrarOrdens()">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                            <button class="btn btn-secondary btn-sm flex-grow-1" onclick="limparFiltros()">
+                                <i class="bi bi-x-circle"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">Status</th>
-                                <th>Plano</th>
-                                <th>Equipamento</th>
-                                <th>Executante</th>
-                                <th class="text-center">Data Programada</th>
-                                <th class="text-center">Data Realizada</th>
-                                <th class="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ordensTableBody">
-                            <tr>
-                                <td colspan="7" class="text-center text-muted">
-                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                                    Carregando ordens...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="card-body p-0 p-md-3">
+                <div class="d-none d-md-block">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Status</th>
+                                    <th>Plano</th>
+                                    <th>Equipamento</th>
+                                    <th>Executante</th>
+                                    <th class="text-center">Data Programada</th>
+                                    <th class="text-center">Data Realizada</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordensTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        Carregando ordens...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="d-md-none" id="ordensCardsList">
+                    <div class="text-center text-muted p-3">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        Carregando ordens...
+                    </div>
                 </div>
             </div>
         </div>
@@ -192,9 +204,12 @@ function carregarOrdens(dataInicio = '', dataFim = '') {
         .then(response => response.json())
         .then(ordens => {
             const tbody = document.getElementById('ordensTableBody');
+            const cardsList = document.getElementById('ordensCardsList');
             
             if (ordens && ordens.length > 0) {
                 tbody.innerHTML = '';
+                cardsList.innerHTML = '';
+                
                 ordens.forEach(ordem => {
                     const row = `
                         <tr>
@@ -212,9 +227,33 @@ function carregarOrdens(dataInicio = '', dataFim = '') {
                         </tr>
                     `;
                     tbody.innerHTML += row;
+                    
+                    const card = `
+                        <div class="border-bottom p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    ${getStatusIcon(ordem.status_visual)}
+                                    <strong>${ordem.plano}</strong>
+                                </div>
+                                <a href="/ordens/${ordem.id}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                            <div class="small text-muted">
+                                <div><i class="bi bi-gear"></i> ${ordem.equipamento}</div>
+                                <div><i class="bi bi-person"></i> ${ordem.executante}</div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span><i class="bi bi-calendar-event"></i> Prog: ${ordem.data_programada}</span>
+                                    <span><i class="bi bi-calendar-check"></i> Real: ${ordem.data_realizada}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    cardsList.innerHTML += card;
                 });
             } else {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nenhuma ordem encontrada</td></tr>';
+                cardsList.innerHTML = '<div class="text-center text-muted p-3">Nenhuma ordem encontrada</div>';
             }
         });
 }

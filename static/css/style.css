@@ -81,6 +81,20 @@ body {
     vertical-align: middle;
 }
 
+#ordensCardsList .border-bottom:last-child {
+    border-bottom: none !important;
+}
+
+#ordensCardsList .border-bottom:hover {
+    background-color: var(--bg-light);
+}
+
+@media (max-width: 767px) {
+    .card-header .d-flex.gap-2 input {
+        font-size: 0.9rem;
+    }
+}
+
 /* Botões Primários */
 .btn-primary {
     background-color: var(--primary-color) !important;
