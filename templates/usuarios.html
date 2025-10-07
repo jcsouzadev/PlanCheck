@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Usuários - PlanCheck{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-people-fill me-2"></i>Gerenciamento de Usuários</h2>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('main.novo_usuario') }}" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Novo Usuário
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Nome</th>
+                            <th>Usuário</th>
+                            <th>Função</th>
+                            <th>Área</th>
+                            <th>Setor</th>
+                            <th>Perfil de Acesso</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if usuarios %}
+                            {% for usuario in usuarios %}
+                            <tr>
+                                <td>{{ usuario.matricula or '-' }}</td>
+                                <td>{{ usuario.nome or '-' }}</td>
+                                <td><i class="bi bi-person-circle me-1"></i>{{ usuario.username }}</td>
+                                <td>{{ usuario.funcao or '-' }}</td>
+                                <td>{{ usuario.area or '-' }}</td>
+                                <td>{{ usuario.setor or '-' }}</td>
+                                <td>
+                                    {% if usuario.perfil_acesso == 'administrador' %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-shield-fill-check me-1"></i>Administrador
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-person-badge me-1"></i>Executante
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ url_for('main.editar_usuario', usuario_id=usuario.id) }}" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if usuario.id != current_user.id %}
+                                    <form method="POST" 
+                                          action="{{ url_for('main.deletar_usuario', usuario_id=usuario.id) }}" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Tem certeza que deseja excluir o usuário {{ usuario.nome }}?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" 
+                                            disabled 
+                                            title="Você não pode excluir seu próprio usuário">
+                                        <i class="bi bi-lock"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    Nenhum usuário cadastrado
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Perfis de Acesso:</strong>
+                <ul class="mb-0 mt-2">
+                    <li><strong>Administrador:</strong> Acesso total ao sistema, incluindo CRUD de todos os recursos</li>
+                    <li><strong>Executante:</strong> Visualização e execução de ordens atribuídas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
