@@ -26,6 +26,8 @@ Sistema web completo para gestão de planos de manutenção e inspeção de equi
 │   ├── ordens.html            # Lista de ordens
 │   ├── ver_ordem.html         # Visualização de ordens
 │   ├── executar_ordem.html    # Checklist de execução
+│   ├── usuarios.html          # Lista de usuários
+│   ├── editar_usuario.html    # Formulário de usuários
 │   └── relatorio_plano.html   # Template para PDF
 └── static/                     # Arquivos estáticos
     ├── css/style.css          # Estilos customizados
@@ -75,11 +77,24 @@ Os campos de não conformidade aparecem automaticamente quando um item é marcad
 - Gráfico de linha temporal: Evolução das inspeções (últimas 30 ordens)
 - Cards informativos: Total de empresas, planos e ordens
 
-### 7. Controle de Acesso
+### 7. Gestão de Usuários
+- **CRUD Completo de Usuários** (exclusivo para administradores):
+  - Nome completo
+  - Matrícula única
+  - Função (cargo/atividade)
+  - Área de atuação
+  - Setor
+  - Perfil de acesso (Administrador/Executante)
+  - Credenciais de login (usuário e senha)
+- Validação de unicidade de matrícula e nome de usuário
+- Proteção contra auto-exclusão
+- Interface intuitiva com listagem e formulários completos
+
+### 8. Controle de Acesso
 - Autenticação de usuários
 - Dois níveis de permissão:
-  - **Administrador**: Acesso total (CRUD de todos os recursos)
-  - **Executante**: Visualização e execução de ordens
+  - **Administrador**: Acesso total (CRUD de todos os recursos, incluindo usuários)
+  - **Executante**: Visualização e execução de ordens atribuídas
 
 ## Tecnologias Utilizadas
 

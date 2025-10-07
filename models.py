@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     nome = db.Column(db.String(120))
-    matricula = db.Column(db.String(50))
+    matricula = db.Column(db.String(50), unique=True)
     funcao = db.Column(db.String(50), nullable=False, default='executante')
     area = db.Column(db.String(100))
     setor = db.Column(db.String(100))
