@@ -202,10 +202,20 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 - Formatação profissional com cores e badges
 
 ### Dashboard Aprimorado
-- **Tabela de Cumprimento de Planos**: Substitui gráfico de pizza, mostra equipamentos com ordens programadas, realizadas e % de cumprimento
-- **Gráfico de Linha Temporal**: Evolução das inspeções (últimas 30 ordens)
-- Comparação visual entre conformes e não conformes ao longo do tempo
-- API de estatísticas com dados temporais e análise por equipamento
+- **Tabela de Cumprimento de Planos**: Mostra equipamentos com ordens programadas, realizadas e % de cumprimento
+- **Gráfico de Barras Agrupadas Mensal**: Visualização lado a lado de ordens programadas, realizadas e % cumprimento por mês (MM/YYYY)
+  - Eixo Y esquerdo: Quantidade de ordens
+  - Eixo Y direito: Percentual de cumprimento
+  - Últimos 6 meses exibidos
+- **Lista de Ordens com Filtros**: Tabela interativa com todas as ordens
+  - Filtros de data (início e fim)
+  - Ícones coloridos de status:
+    - 🟡 Pendente (amarelo)
+    - ✅ No Prazo (verde) 
+    - ✅ Concluído (verde)
+    - ⚠️ Atrasado (vermelho)
+    - 🔄 Em Andamento (azul)
+  - Colunas: Status, Plano, Equipamento, Executante, Data Programada, Data Realizada, Ações
 - Indicadores coloridos de performance (verde ≥80%, amarelo ≥50%, vermelho <50%)
 
 ## Melhorias Futuras Sugeridas
@@ -235,4 +245,4 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 ✅ Sistema rodando na porta 5000
 
 ## Última Atualização
-07 de outubro de 2025 - Substituído gráfico de pizza por tabela de cumprimento de planos por equipamento no dashboard
+07 de outubro de 2025 - Dashboard reformulado com gráfico de barras agrupadas mensal e lista interativa de ordens com filtros de data

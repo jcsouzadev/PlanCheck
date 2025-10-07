@@ -572,24 +572,26 @@ def dashboard_stats():
     ordens_em_andamento = OrdemExecucao.query.filter_by(status='em_andamento').count()
     ordens_concluidas = OrdemExecucao.query.filter_by(status='concluida').count()
     
-    ordens_concluidas_lista = OrdemExecucao.query.filter_by(status='concluida').order_by(OrdemExecucao.data_conclusao.desc()).limit(30).all()
-    dados_temporais = {}
+    todas_ordens = OrdemExecucao.query.all()
+    dados_mensais = {}
     
-    for ordem in ordens_concluidas_lista:
-        if ordem.data_conclusao:
-            data_str = ordem.data_conclusao.strftime('%d/%m')
-            if data_str not in dados_temporais:
-                dados_temporais[data_str] = {'conformes': 0, 'nao_conformes': 0}
+    for ordem in todas_ordens:
+        data_ref = ordem.data_programada if ordem.data_programada else ordem.data_criacao
+        if data_ref:
+            mes_str = data_ref.strftime('%m/%Y')
+            if mes_str not in dados_mensais:
+                dados_mensais[mes_str] = {'programadas': 0, 'realizadas': 0}
             
-            for apontamento in ordem.itens_apontados:
-                if apontamento.resultado == 'conforme':
-                    dados_temporais[data_str]['conformes'] += 1
-                elif apontamento.resultado == 'nao_conforme':
-                    dados_temporais[data_str]['nao_conformes'] += 1
+            dados_mensais[mes_str]['programadas'] += 1
+            if ordem.status == 'concluida':
+                dados_mensais[mes_str]['realizadas'] += 1
     
-    datas = list(dados_temporais.keys())
-    conformes_temporal = [dados_temporais[d]['conformes'] for d in datas]
-    nao_conformes_temporal = [dados_temporais[d]['nao_conformes'] for d in datas]
+    meses_ordenados = sorted(dados_mensais.keys(), key=lambda x: datetime.strptime(x, '%m/%Y'))
+    meses = meses_ordenados[-6:] if len(meses_ordenados) > 6 else meses_ordenados
+    
+    programadas_mensal = [dados_mensais[m]['programadas'] for m in meses]
+    realizadas_mensal = [dados_mensais[m]['realizadas'] for m in meses]
+    percentual_mensal = [round((dados_mensais[m]['realizadas'] / dados_mensais[m]['programadas'] * 100), 1) if dados_mensais[m]['programadas'] > 0 else 0 for m in meses]
     
     equipamentos_stats = []
     equipamentos = Equipamento.query.all()
@@ -624,9 +626,64 @@ def dashboard_stats():
             'concluidas': ordens_concluidas
         },
         'equipamentos': equipamentos_stats,
-        'temporal': {
-            'datas': datas,
-            'conformes': conformes_temporal,
-            'nao_conformes': nao_conformes_temporal
+        'mensal': {
+            'meses': meses,
+            'programadas': programadas_mensal,
+            'realizadas': realizadas_mensal,
+            'percentual': percentual_mensal
         }
     })
+
+@main_bp.route('/api/dashboard/ordens')
+@login_required
+def dashboard_ordens():
+    data_inicio = request.args.get('data_inicio')
+    data_fim = request.args.get('data_fim')
+    
+    query = OrdemExecucao.query
+    
+    if data_inicio:
+        data_inicio_obj = datetime.strptime(data_inicio, '%Y-%m-%d')
+        query = query.filter(OrdemExecucao.data_programada >= data_inicio_obj)
+    
+    if data_fim:
+        data_fim_obj = datetime.strptime(data_fim, '%Y-%m-%d')
+        query = query.filter(OrdemExecucao.data_programada <= data_fim_obj)
+    
+    ordens = query.order_by(OrdemExecucao.data_programada.desc()).all()
+    
+    ordens_lista = []
+    hoje = datetime.now()
+    
+    for ordem in ordens:
+        data_prog = ordem.data_programada.strftime('%d/%m/%Y') if ordem.data_programada else '-'
+        data_real = ordem.data_conclusao.strftime('%d/%m/%Y') if ordem.data_conclusao else '-'
+        
+        if ordem.status == 'concluida':
+            if ordem.data_conclusao and ordem.data_programada:
+                if ordem.data_conclusao <= ordem.data_programada:
+                    status_visual = 'no_prazo'
+                else:
+                    status_visual = 'atrasado'
+            else:
+                status_visual = 'concluido'
+        elif ordem.status == 'pendente':
+            if ordem.data_programada and ordem.data_programada < hoje.date():
+                status_visual = 'atrasado'
+            else:
+                status_visual = 'pendente'
+        else:
+            status_visual = 'em_andamento'
+        
+        ordens_lista.append({
+            'id': ordem.id,
+            'plano': ordem.plano.titulo if ordem.plano else '-',
+            'equipamento': ordem.plano.equipamento.nome if ordem.plano and ordem.plano.equipamento else '-',
+            'executante': ordem.executante.username if ordem.executante else '-',
+            'data_programada': data_prog,
+            'data_realizada': data_real,
+            'status': ordem.status,
+            'status_visual': status_visual
+        })
+    
+    return jsonify(ordens_lista)
