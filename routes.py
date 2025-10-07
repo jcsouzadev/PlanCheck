@@ -687,3 +687,113 @@ def dashboard_ordens():
         })
     
     return jsonify(ordens_lista)
+
+@main_bp.route('/usuarios', methods=['GET'])
+@login_required
+@admin_required
+def usuarios():
+    usuarios = User.query.order_by(User.nome).all()
+    return render_template('usuarios.html', usuarios=usuarios)
+
+@main_bp.route('/usuarios/novo', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def novo_usuario():
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        matricula = request.form.get('matricula')
+        funcao = request.form.get('funcao')
+        area = request.form.get('area')
+        setor = request.form.get('setor')
+        perfil_acesso = request.form.get('perfil_acesso')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user_exists = User.query.filter_by(username=username).first()
+        if user_exists:
+            flash('Nome de usuário já existe!', 'danger')
+            return redirect(url_for('main.novo_usuario'))
+        
+        matricula_exists = User.query.filter_by(matricula=matricula).first()
+        if matricula_exists:
+            flash('Matrícula já cadastrada!', 'danger')
+            return redirect(url_for('main.novo_usuario'))
+        
+        novo_user = User(
+            nome=nome,
+            matricula=matricula,
+            funcao=funcao,
+            area=area,
+            setor=setor,
+            perfil_acesso=perfil_acesso,
+            username=username
+        )
+        novo_user.set_password(password)
+        
+        db.session.add(novo_user)
+        db.session.commit()
+        
+        flash('Usuário criado com sucesso!', 'success')
+        return redirect(url_for('main.usuarios'))
+    
+    return render_template('editar_usuario.html', usuario=None)
+
+@main_bp.route('/usuarios/<int:usuario_id>/editar', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def editar_usuario(usuario_id):
+    usuario = User.query.get_or_404(usuario_id)
+    
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        matricula = request.form.get('matricula')
+        funcao = request.form.get('funcao')
+        area = request.form.get('area')
+        setor = request.form.get('setor')
+        perfil_acesso = request.form.get('perfil_acesso')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user_exists = User.query.filter(User.username == username, User.id != usuario_id).first()
+        if user_exists:
+            flash('Nome de usuário já existe!', 'danger')
+            return redirect(url_for('main.editar_usuario', usuario_id=usuario_id))
+        
+        matricula_exists = User.query.filter(User.matricula == matricula, User.id != usuario_id).first()
+        if matricula_exists:
+            flash('Matrícula já cadastrada!', 'danger')
+            return redirect(url_for('main.editar_usuario', usuario_id=usuario_id))
+        
+        usuario.nome = nome
+        usuario.matricula = matricula
+        usuario.funcao = funcao
+        usuario.area = area
+        usuario.setor = setor
+        usuario.perfil_acesso = perfil_acesso
+        usuario.username = username
+        
+        if password:
+            usuario.set_password(password)
+        
+        db.session.commit()
+        
+        flash('Usuário atualizado com sucesso!', 'success')
+        return redirect(url_for('main.usuarios'))
+    
+    return render_template('editar_usuario.html', usuario=usuario)
+
+@main_bp.route('/usuarios/<int:usuario_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def deletar_usuario(usuario_id):
+    usuario = User.query.get_or_404(usuario_id)
+    
+    if usuario.id == current_user.id:
+        flash('Você não pode excluir seu próprio usuário!', 'danger')
+        return redirect(url_for('main.usuarios'))
+    
+    db.session.delete(usuario)
+    db.session.commit()
+    
+    flash('Usuário excluído com sucesso!', 'success')
+    return redirect(url_for('main.usuarios'))
