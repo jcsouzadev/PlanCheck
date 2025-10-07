@@ -65,17 +65,37 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-7">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Conformidade dos Itens</h5>
+                <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Cumprimento de Planos por Equipamento</h5>
             </div>
             <div class="card-body">
-                <canvas id="conformidadeChart"></canvas>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover" id="equipamentosTable">
+                        <thead>
+                            <tr>
+                                <th>Equipamento</th>
+                                <th>Código</th>
+                                <th class="text-center">Programadas</th>
+                                <th class="text-center">Realizadas</th>
+                                <th class="text-center">% Cumprimento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="equipamentosTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                    Carregando dados...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-5">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Status das Ordens</h5>
@@ -107,25 +127,28 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/api/dashboard/stats')
         .then(response => response.json())
         .then(data => {
-            const conformidadeCtx = document.getElementById('conformidadeChart').getContext('2d');
-            new Chart(conformidadeCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Conforme', 'Não Conforme', 'N/A'],
-                    datasets: [{
-                        data: [data.itens.conformes, data.itens.nao_conformes, data.itens.na],
-                        backgroundColor: ['#7AAD6B', '#dc3545', '#C7D7E4']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+            const tbody = document.getElementById('equipamentosTableBody');
+            
+            if (data.equipamentos && data.equipamentos.length > 0) {
+                tbody.innerHTML = '';
+                data.equipamentos.forEach(eq => {
+                    const percentualClass = eq.percentual >= 80 ? 'text-success' : eq.percentual >= 50 ? 'text-warning' : 'text-danger';
+                    const row = `
+                        <tr>
+                            <td>${eq.equipamento}</td>
+                            <td>${eq.codigo}</td>
+                            <td class="text-center">${eq.programadas}</td>
+                            <td class="text-center">${eq.realizadas}</td>
+                            <td class="text-center">
+                                <strong class="${percentualClass}">${eq.percentual}%</strong>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum equipamento cadastrado</td></tr>';
+            }
 
             const ordensCtx = document.getElementById('ordensChart').getContext('2d');
             new Chart(ordensCtx, {

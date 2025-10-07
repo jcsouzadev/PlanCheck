@@ -572,20 +572,6 @@ def dashboard_stats():
     ordens_em_andamento = OrdemExecucao.query.filter_by(status='em_andamento').count()
     ordens_concluidas = OrdemExecucao.query.filter_by(status='concluida').count()
     
-    total_itens = 0
-    itens_conformes = 0
-    itens_nao_conformes = 0
-    itens_na = 0
-    
-    for item in ItemInspecaoApontado.query.all():
-        total_itens += 1
-        if item.resultado == 'conforme':
-            itens_conformes += 1
-        elif item.resultado == 'nao_conforme':
-            itens_nao_conformes += 1
-        elif item.resultado == 'na':
-            itens_na += 1
-    
     ordens_concluidas_lista = OrdemExecucao.query.filter_by(status='concluida').order_by(OrdemExecucao.data_conclusao.desc()).limit(30).all()
     dados_temporais = {}
     
@@ -605,6 +591,31 @@ def dashboard_stats():
     conformes_temporal = [dados_temporais[d]['conformes'] for d in datas]
     nao_conformes_temporal = [dados_temporais[d]['nao_conformes'] for d in datas]
     
+    equipamentos_stats = []
+    equipamentos = Equipamento.query.all()
+    
+    for equipamento in equipamentos:
+        planos = PlanoInspecao.query.filter_by(equipamento_id=equipamento.id).all()
+        total_programadas = 0
+        total_realizadas = 0
+        
+        for plano in planos:
+            ordens_plano = OrdemExecucao.query.filter_by(plano_id=plano.id).all()
+            total_programadas += len(ordens_plano)
+            total_realizadas += sum(1 for ordem in ordens_plano if ordem.status == 'concluida')
+        
+        percentual = round((total_realizadas / total_programadas * 100), 1) if total_programadas > 0 else 0
+        
+        equipamentos_stats.append({
+            'equipamento': equipamento.nome,
+            'codigo': equipamento.codigo or '-',
+            'programadas': total_programadas,
+            'realizadas': total_realizadas,
+            'percentual': percentual
+        })
+    
+    equipamentos_stats.sort(key=lambda x: x['percentual'], reverse=True)
+    
     return jsonify({
         'ordens': {
             'total': total_ordens,
@@ -612,12 +623,7 @@ def dashboard_stats():
             'em_andamento': ordens_em_andamento,
             'concluidas': ordens_concluidas
         },
-        'itens': {
-            'total': total_itens,
-            'conformes': itens_conformes,
-            'nao_conformes': itens_nao_conformes,
-            'na': itens_na
-        },
+        'equipamentos': equipamentos_stats,
         'temporal': {
             'datas': datas,
             'conformes': conformes_temporal,

@@ -68,10 +68,11 @@ Os campos de não conformidade aparecem automaticamente quando um item é marcad
 - Exportação em Excel para análise de dados
 - Relatórios por plano com todos os itens de inspeção
 
-### 6. Dashboard com Gráficos
+### 6. Dashboard com Análises
 - Estatísticas em tempo real
-- Gráfico de pizza: Proporção de conformidades
+- **Tabela de Cumprimento de Planos**: Exibe equipamentos com total de ordens programadas, realizadas e % de cumprimento (cores indicam performance: verde ≥80%, amarelo ≥50%, vermelho <50%)
 - Gráfico de barras: Status das ordens
+- Gráfico de linha temporal: Evolução das inspeções (últimas 30 ordens)
 - Cards informativos: Total de empresas, planos e ordens
 
 ### 7. Controle de Acesso
@@ -201,10 +202,11 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 - Formatação profissional com cores e badges
 
 ### Dashboard Aprimorado
+- **Tabela de Cumprimento de Planos**: Substitui gráfico de pizza, mostra equipamentos com ordens programadas, realizadas e % de cumprimento
 - **Gráfico de Linha Temporal**: Evolução das inspeções (últimas 30 ordens)
 - Comparação visual entre conformes e não conformes ao longo do tempo
-- API de estatísticas com dados temporais
-- Três gráficos interativos: Pizza (conformidade), Barras (status) e Linha (evolução)
+- API de estatísticas com dados temporais e análise por equipamento
+- Indicadores coloridos de performance (verde ≥80%, amarelo ≥50%, vermelho <50%)
 
 ## Melhorias Futuras Sugeridas
 
@@ -227,10 +229,10 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 ✅ **Relatórios por ordem de execução (PDF/Excel)**
 ✅ **Relatórios por equipamento com hierarquia completa**
 ✅ **Gráfico de linha temporal mostrando evolução das inspeções**
-✅ **Dashboard com estatísticas avançadas e análise temporal**
+✅ **Dashboard com tabela de cumprimento de planos e análise temporal**
 ✅ Interface em português brasileiro
 ✅ Banco de dados PostgreSQL configurado
 ✅ Sistema rodando na porta 5000
 
 ## Última Atualização
-07 de outubro de 2025 - Implementada nova paleta de cores "Pentire Cool Summer Day"
+07 de outubro de 2025 - Substituído gráfico de pizza por tabela de cumprimento de planos por equipamento no dashboard
