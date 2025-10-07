@@ -11,11 +11,27 @@ with app.app_context():
     admin_exists = User.query.filter_by(username='admin').first()
     if not admin_exists:
         print("Criando usuário administrador...")
-        admin = User(username='admin', funcao='administrador')
+        admin = User(
+            username='admin',
+            nome='Administrador do Sistema',
+            matricula='0001',
+            funcao='Gestor de Manutenção',
+            area='Administração',
+            setor='TI',
+            perfil_acesso='administrador'
+        )
         admin.set_password('admin123')
         db.session.add(admin)
         
-        executante = User(username='executante', funcao='executante')
+        executante = User(
+            username='executante',
+            nome='João Silva',
+            matricula='0002',
+            funcao='Técnico de Manutenção',
+            area='Operações',
+            setor='Manutenção',
+            perfil_acesso='executante'
+        )
         executante.set_password('exec123')
         db.session.add(executante)
         

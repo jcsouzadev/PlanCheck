@@ -11,7 +11,12 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    nome = db.Column(db.String(120))
+    matricula = db.Column(db.String(50))
     funcao = db.Column(db.String(50), nullable=False, default='executante')
+    area = db.Column(db.String(100))
+    setor = db.Column(db.String(100))
+    perfil_acesso = db.Column(db.String(50), nullable=False, default='executante')
     
     ordens_executadas = db.relationship('OrdemExecucao', backref='executante', lazy=True)
     
@@ -22,7 +27,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
     
     def is_admin(self):
-        return self.funcao == 'administrador'
+        return self.perfil_acesso == 'administrador'
 
 @login_manager.user_loader
 def load_user(user_id):
