@@ -31,10 +31,14 @@
                             <i class="bi bi-building"></i> Empresas
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.planos') }}">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarPlanos" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-file-earmark-text"></i> Planos
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarPlanos">
+                            <li><a class="dropdown-item" href="{{ url_for('main.planos') }}"><i class="bi bi-list-check"></i> Lista de Planos</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.mapa_anual_planos') }}"><i class="bi bi-calendar3"></i> Mapa Anual (52 Semanas)</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.usuarios') }}">

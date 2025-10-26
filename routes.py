@@ -468,6 +468,105 @@ def excluir_componente_ajax(componente_id):
 # ==============================================================================
 # Rotas de Planos de Inspeção
 # ==============================================================================
+@main_bp.route('/planos/mapa-anual')
+@login_required
+def mapa_anual_planos():
+    """Mapa de 52 semanas mostrando quando cada plano deve ser executado"""
+    from datetime import date, timedelta
+    
+    # Buscar todos os planos ativos com seus equipamentos
+    planos = PlanoInspecao.query.options(
+        joinedload(PlanoInspecao.equipamento)
+        .joinedload(Equipamento.subconjunto)
+        .joinedload(Subconjunto.conjunto)
+        .joinedload(Conjunto.area)
+        .joinedload(Area.setor)
+        .joinedload(Setor.empresa)
+    ).all()
+    
+    # Determinar o ano atual
+    hoje = date.today()
+    ano_atual = hoje.year
+    
+    # Calcular a primeira semana do ano (ISO 8601: semana começa segunda)
+    primeiro_dia = date(ano_atual, 1, 1)
+    dias_ate_segunda = (7 - primeiro_dia.weekday()) % 7
+    if dias_ate_segunda == 0 and primeiro_dia.weekday() != 0:
+        dias_ate_segunda = 7
+    primeira_segunda = primeiro_dia + timedelta(days=dias_ate_segunda if primeiro_dia.weekday() > 3 else -primeiro_dia.weekday())
+    
+    # Gerar as 52 semanas do ano
+    semanas = []
+    for num_semana in range(1, 53):
+        inicio_semana = primeira_segunda + timedelta(weeks=num_semana - 1)
+        fim_semana = inicio_semana + timedelta(days=6)
+        semanas.append({
+            'numero': num_semana,
+            'inicio': inicio_semana,
+            'fim': fim_semana,
+            'mes': inicio_semana.strftime('%b')
+        })
+    
+    # Para cada plano, calcular em quais semanas ele deve ser executado
+    mapa_planos = []
+    for plano in planos:
+        if not plano.data_inicio:
+            continue
+            
+        # Calcular as datas previstas baseado na configuração
+        datas_previstas = []
+        
+        if plano.tipo_geracao == 'diario' and plano.frequencia:
+            # Executar a cada X dias
+            data_atual = plano.data_inicio
+            while data_atual.year == ano_atual:
+                if data_atual >= primeiro_dia:
+                    datas_previstas.append(data_atual)
+                data_atual = data_atual + timedelta(days=plano.frequencia)
+        
+        elif plano.tipo_geracao == 'por_hora' and plano.frequencia:
+            # Converter frequência de horas para dias (assumindo 24h/dia)
+            dias_frequencia = plano.frequencia / 24.0
+            data_atual = plano.data_inicio
+            while data_atual.year == ano_atual:
+                if data_atual >= primeiro_dia:
+                    datas_previstas.append(data_atual)
+                data_atual = data_atual + timedelta(days=dias_frequencia)
+        
+        elif plano.tipo_geracao == 'data_abertura':
+            # Apenas na data de início
+            if plano.data_inicio.year == ano_atual:
+                datas_previstas.append(plano.data_inicio)
+        
+        # Mapear datas para números de semana
+        semanas_execucao = set()
+        for data_prevista in datas_previstas:
+            # Encontrar em qual semana esta data cai
+            for semana in semanas:
+                if semana['inicio'] <= data_prevista <= semana['fim']:
+                    semanas_execucao.add(semana['numero'])
+                    break
+        
+        equipamento = plano.equipamento
+        if equipamento:
+            mapa_planos.append({
+                'plano': plano,
+                'equipamento_nome': equipamento.nome,
+                'equipamento_codigo': equipamento.codigo or '-',
+                'localizacao': f"{equipamento.subconjunto.conjunto.area.setor.empresa.nome} > {equipamento.subconjunto.conjunto.area.setor.nome}",
+                'semanas_execucao': sorted(semanas_execucao),
+                'total_execucoes': len(semanas_execucao)
+            })
+    
+    # Ordenar por localização e equipamento
+    mapa_planos.sort(key=lambda x: (x['localizacao'], x['equipamento_nome']))
+    
+    return render_template('mapa_anual_planos.html', 
+                         mapa_planos=mapa_planos, 
+                         semanas=semanas,
+                         ano_atual=ano_atual,
+                         semana_atual=hoje.isocalendar()[1])
+
 @main_bp.route('/planos', methods=['GET', 'POST'])
 @login_required
 @admin_required
