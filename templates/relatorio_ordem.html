@@ -1,209 +1,298 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Ordem de Serviço Nº {{ ordem.id }}</title>
+    <title>Ordem de Serviço #{{ ordem.id }}</title>
     <style>
+        /* ========================================================================= */
+        /* DEFINIÇÕES DE PÁGINA A4 (WeasyPrint / CSS Paged Media) */
+        /* ========================================================================= */
         @page {
             size: A4;
-            margin: 2cm;
+            /* Margens padrão para documentos formais */
+            margin-top: 2cm; 
+            margin-bottom: 2cm;
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
+            
+            /* Definição de rodapé fixo */
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages) " | PlanCheck | Gerado em {{ now().strftime('%d/%m/%Y %H:%M') }}";
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                color: #555;
+            }
+        }
+
+        /* Força a seção de assinaturas para a próxima página */
+        #assinaturas-page-break {
+            page-break-before: always;
+            margin-top: 5cm; /* Adiciona espaço extra na nova página */
         }
         
+        /* ========================================================================= */
+        /* ESTILIZAÇÃO GERAL */
+        /* ========================================================================= */
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            font-size: 11pt;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            color: #333;
             line-height: 1.4;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #295673;
+
+        .header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #295673; /* Cor institucional */
+            padding-bottom: 5px;
+            margin-bottom: 15px;
         }
         
-        .header h1 {
+        .header-main .logo {
+            font-size: 18pt;
+            font-weight: bold;
             color: #295673;
-            margin: 0 0 5px 0;
-            font-size: 24pt;
         }
         
-        .header .empresa {
-            color: #6c757d;
-            font-size: 12pt;
-            font-weight: 500;
+        .header-main .title-box {
+            text-align: right;
+            border: 1px solid #295673;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
         }
         
-        .info-box {
-            background-color: #F2EBF3;
-            padding: 15px;
-            margin: 20px 0;
-            border-left: 5px solid #295673;
-            border-radius: 4px;
+        .header-main .title-box h1 {
+            margin: 0;
+            font-size: 14pt;
+            color: #295673;
         }
         
-        .info-box p {
-            margin: 5px 0;
+        .header-main .title-box p {
+            margin: 0;
             font-size: 10pt;
         }
-        
-        .info-box strong {
-            color: #495057;
-            min-width: 140px;
-            display: inline-block;
+
+        /* ========================================================================= */
+        /* DETALHES DA ORDEM (GRID FLEXÍVEL) */
+        /* ========================================================================= */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* Três colunas iguais */
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
         }
         
-        h2 {
-            color: #295673;
-            font-size: 14pt;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #C7D7E4;
-            padding-bottom: 5px;
+        .info-item {
+            padding: 5px;
         }
         
-        table {
+        .info-item strong {
+            display: block;
+            color: #555;
+            font-size: 8pt;
+            margin-bottom: 2px;
+        }
+        
+        .info-item span {
+            display: block;
+            font-size: 10pt;
+            font-weight: bold;
+            color: #222;
+        }
+
+        /* ========================================================================= */
+        /* TABELA DE ITENS APONTADOS */
+        /* ========================================================================= */
+        .table-os {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 9pt;
+            margin-top: 20px;
         }
         
-        th, td {
-            border: 1px solid #dee2e6;
+        .table-os th, .table-os td {
+            border: 1px solid #ccc;
             padding: 8px;
             text-align: left;
-            vertical-align: top;
+            font-size: 9pt;
         }
         
-        th {
+        .table-os th {
             background-color: #295673;
             color: white;
-            font-weight: 600;
-            font-size: 9pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Estilos específicos para resultados importantes */
+        .nao_conforme {
+            background-color: #ffcccc; 
+            font-weight: bold;
+            color: #900;
         }
         
         .conforme {
-            background-color: rgba(122, 173, 107, 0.2);
+            background-color: #ccffcc;
+            color: #060;
+        }
+
+        /* ========================================================================= */
+        /* ASSINATURAS */
+        /* ========================================================================= */
+        .assinaturas {
+            margin-top: 50px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            width: 80%;
+            margin-left: 10%;
         }
         
-        .nao-conforme {
-            background-color: #f8d7da;
-        }
-        
-        .na {
-            background-color: rgba(199, 215, 228, 0.3);
-        }
-        
-        .footer {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #dee2e6;
+        .assinatura-box {
             text-align: center;
-            font-size: 8pt;
-            color: #6c757d;
+            padding-top: 20px;
+            border-top: 1px solid #333;
         }
         
-        .ref-values {
-            color: #295673;
-            font-size: 8pt;
-            font-style: italic;
-            display: block;
-            margin-top: 3px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 9pt;
-            font-weight: 600;
-        }
-        
-        .status-concluida {
-            background-color: rgba(122, 173, 107, 0.3);
-            color: #3d6835;
-        }
-        
-        .status-pendente {
-            background-color: #fff3cd;
-            color: #664d03;
-        }
-        
-        .status-em-andamento {
-            background-color: rgba(41, 86, 115, 0.2);
-            color: #295673;
+        .assinatura-box p {
+            margin: 0;
+            font-size: 10pt;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Ordem de Serviço Nº {{ ordem.id }}</h1>
-        {% if ordem.plano and ordem.plano.equipamento and ordem.plano.equipamento.subconjunto and ordem.plano.equipamento.subconjunto.conjunto and ordem.plano.equipamento.subconjunto.conjunto.area and ordem.plano.equipamento.subconjunto.conjunto.area.setor and ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa %}
-        <div class="empresa">{{ ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa.nome }}</div>
-        {% endif %}
+
+    <header class="header-main">
+        <div class="logo">
+            PlanCheck
+        </div>
+        <div class="title-box">
+            <h1>ORDEM DE SERVIÇO DE INSPEÇÃO</h1>
+            <p>Nº: {{ ordem.id }}</p>
+        </div>
+    </header>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <strong>Plano de Inspeção</strong>
+            <span>{{ ordem.plano.titulo if ordem.plano else 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Equipamento (Código)</strong>
+            <span>{{ ordem.plano.equipamento.nome if ordem.plano and ordem.plano.equipamento else 'N/A' }} ({{ ordem.plano.equipamento.codigo if ordem.plano and ordem.plano.equipamento else '-' }})</span>
+        </div>
+        <div class="info-item">
+            <strong>Localização</strong>
+            <span>{{ ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa.nome|upper if ordem.plano and ordem.plano.equipamento else 'N/A' }}</span>
+        </div>
+        
+        <div class="info-item">
+            <strong>Executante Programado</strong>
+            <span>{{ ordem.executante.nome|upper if ordem.executante else 'N/A' }} ({{ ordem.executante.matricula if ordem.executante else '-' }})</span>
+        </div>
+        <div class="info-item">
+            <strong>Data Programada</strong>
+            <span>{{ ordem.data_programada.strftime('%d/%m/%Y') if ordem.data_programada else '-' }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Status / Conclusão</strong>
+            <span>
+                {% if ordem.status == 'concluida' %}
+                    CONCLUÍDA em {{ ordem.data_conclusao.strftime('%d/%m/%Y às %H:%M') if ordem.data_conclusao else 'data N/A' }}
+                {% else %}
+                    {{ ordem.status|upper }}
+                {% endif %}
+            </span>
+        </div>
     </div>
     
-    <div class="info-box">
-        <p><strong>Plano de Inspeção:</strong> {{ ordem.plano.titulo }}</p>
-        <p><strong>Equipamento:</strong> {{ ordem.plano.equipamento.nome }}</p>
-        {% if ordem.plano.equipamento.codigo %}
-        <p><strong>Código:</strong> {{ ordem.plano.equipamento.codigo }}</p>
-        {% endif %}
-        <p><strong>Executante:</strong> {{ ordem.executante.username }}</p>
-        <p><strong>Data Programada:</strong> {{ ordem.data_programada.strftime('%d/%m/%Y') }}</p>
-        <p><strong>Status:</strong> 
-            <span class="status-badge status-{{ ordem.status.lower().replace(' ', '-') }}">
-                {{ ordem.status.upper() }}
-            </span>
-        </p>
-        {% if ordem.data_conclusao %}
-        <p><strong>Data de Conclusão:</strong> {{ ordem.data_conclusao.strftime('%d/%m/%Y às %H:%M') }}</p>
-        {% endif %}
-    </div>
+    <h2>Itens de Inspeção e Apontamentos</h2>
 
-    <h2>Itens Apontados</h2>
-    <table>
+    <table class="table-os">
         <thead>
             <tr>
-                <th style="width: 5%;">#</th>
-                <th style="width: 25%;">Item</th>
-                <th style="width: 10%;">Tipo</th>
+                <th style="width: 30%;">Descrição do Item / Tipo</th>
                 <th style="width: 10%;">Resultado</th>
-                <th style="width: 10%;">Valor Medido</th>
-                <th style="width: 15%;">Observação</th>
-                <th style="width: 12.5%;">Falha</th>
-                <th style="width: 12.5%;">Solução</th>
+                <th style="width: 10%;">Valor (Min/Max)</th>
+                <th style="width: 25%;">Observação / Falha Apontada</th>
+                <th style="width: 25%;">Solução / Recursos Utilizados</th>
             </tr>
         </thead>
         <tbody>
             {% for apontamento in ordem.itens_apontados %}
-            <tr class="{% if apontamento.resultado == 'conforme' %}conforme{% elif apontamento.resultado == 'nao_conforme' %}nao-conforme{% else %}na{% endif %}">
-                <td>{{ loop.index }}</td>
+            <tr>
                 <td>
-                    <strong>{{ apontamento.item_inspecao.descricao }}</strong>
-                    {% if apontamento.item_inspecao.tipo == 'medicoes' and (apontamento.item_inspecao.valor_min or apontamento.item_inspecao.valor_max) %}
-                    <span class="ref-values">
-                        Ref: Min {{ apontamento.item_inspecao.valor_min if apontamento.item_inspecao.valor_min else '-' }} | 
-                        Max {{ apontamento.item_inspecao.valor_max if apontamento.item_inspecao.valor_max else '-' }}
-                    </span>
+                    <strong>{{ apontamento.item_inspecao.descricao }}</strong><br>
+                    <small>Tipo: {{ apontamento.item_inspecao.tipo|upper if apontamento.item_inspecao.tipo else 'Visual' }}</small>
+                </td>
+
+                <td class="{{ apontamento.resultado|lower if apontamento.resultado else 'pendente' }}">
+                    {{ apontamento.resultado|upper if apontamento.resultado else 'PENDENTE' }}
+                </td>
+                
+                <td>
+                    {% if apontamento.valor_atual %}
+                        **Medido:** {{ apontamento.valor_atual }}<br>
+                    {% endif %}
+                    {% if apontamento.item_inspecao.valor_min or apontamento.item_inspecao.valor_max %}
+                        <small>Ref: ({{ apontamento.item_inspecao.valor_min or '-' }} / {{ apontamento.item_inspecao.valor_max or '-' }})</small>
+                    {% else %}
+                        -
                     {% endif %}
                 </td>
-                <td>{{ apontamento.item_inspecao.tipo|title if apontamento.item_inspecao.tipo else '-' }}</td>
-                <td>{{ apontamento.resultado|title if apontamento.resultado else '-' }}</td>
-                <td>{{ apontamento.valor_atual if apontamento.valor_atual else '-' }}</td>
-                <td>{{ apontamento.observacao if apontamento.observacao else '-' }}</td>
-                <td>{{ apontamento.falha if apontamento.falha else '-' }}</td>
-                <td>{{ apontamento.solucao if apontamento.solucao else '-' }}</td>
+
+                <td>
+                    {% if apontamento.falha %}
+                        **FALHA:** {{ apontamento.falha }}<br>
+                    {% endif %}
+                    {% if apontamento.observacao %}
+                        **OBS:** {{ apontamento.observacao }}
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if apontamento.solucao %}
+                        **SOLUÇÃO:** {{ apontamento.solucao }}
+                        <hr style="border: 0; border-top: 1px dashed #ccc; margin: 5px 0;">
+                        **Tempo (h):** {{ apontamento.tempo_necessario or '-' }} | **Qtd. Executantes:** {{ apontamento.qtde_executantes or '-' }}<br>
+                        **Materiais:** {{ apontamento.materiais or '-' }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <div class="footer">
-        <p>Relatório gerado em {{ ordem.data_conclusao.strftime('%d/%m/%Y às %H:%M') if ordem.data_conclusao else 'processamento' }} - PlanCheck Sistema de Gestão de Manutenção</p>
+    <div id="assinaturas-page-break">
+        <h2 style="text-align: center;">Registro e Aprovação</h2>
+        
+        <div class="info-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 50px; border: none; background-color: white;">
+            <div class="info-item">
+                <strong>Data de Início da Execução</strong>
+                <span>_________________________</span>
+            </div>
+            <div class="info-item">
+                <strong>Data de Término da Execução</strong>
+                <span>_________________________</span>
+            </div>
+        </div>
+
+        <div class="assinaturas">
+            <div class="assinatura-box">
+                <p>{{ ordem.executante.nome|upper if ordem.executante else 'N/A' }}</p>
+                <p>Executante (Assinatura e Matrícula)</p>
+            </div>
+            <div class="assinatura-box">
+                <p>_________________________</p>
+                <p>Supervisor / Inspetor (Assinatura e Matrícula)</p>
+            </div>
+        </div>
     </div>
+    
 </body>
 </html>
