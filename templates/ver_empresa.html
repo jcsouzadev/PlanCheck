@@ -67,9 +67,31 @@
                                                             <ul class="list-group list-group-flush ms-3 mt-2">
                                                                 {% for equipamento in subconjunto.equipamentos %}
                                                                 <li class="list-group-item">
-                                                                    <i class="bi bi-gear"></i> <strong>{{ equipamento.nome }}</strong>
-                                                                    {% if equipamento.codigo %}<span class="badge bg-secondary">{{ equipamento.codigo }}</span>{% endif %}
-                                                                    <span class="badge bg-info">{{ equipamento.planos|length }} planos</span>
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <div>
+                                                                            <i class="bi bi-gear"></i> <strong>{{ equipamento.nome }}</strong>
+                                                                            {% if equipamento.codigo %}<span class="badge bg-secondary">{{ equipamento.codigo }}</span>{% endif %}
+                                                                            <span class="badge bg-info">{{ equipamento.planos|length }} planos</span>
+                                                                            <span class="badge bg-warning text-dark">{{ equipamento.componentes|length }} componentes</span>
+                                                                        </div>
+                                                                        <button type="button" class="btn btn-sm btn-success" onclick="showComponenteModal({{ equipamento.id }}, '{{ equipamento.nome }}')">
+                                                                            <i class="bi bi-plus"></i> Adicionar Componente
+                                                                        </button>
+                                                                    </div>
+                                                                    {% if equipamento.componentes %}
+                                                                    <ul class="list-unstyled ms-4 mt-2">
+                                                                        {% for componente in equipamento.componentes %}
+                                                                        <li class="mb-1">
+                                                                            <i class="bi bi-puzzle text-warning"></i> 
+                                                                            <strong>{{ componente.nome }}</strong>
+                                                                            {% if componente.tag %}<span class="badge bg-secondary">{{ componente.tag }}</span>{% endif %}
+                                                                            {% if componente.vida_util_estimada %}
+                                                                            <small class="text-muted">(Vida útil: {{ componente.vida_util_estimada }}h)</small>
+                                                                            {% endif %}
+                                                                        </li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                    {% endif %}
                                                                 </li>
                                                                 {% endfor %}
                                                             </ul>
@@ -221,6 +243,38 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalNovoComponente" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="formComponente">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Componente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Equipamento: <strong id="equipamentoNome"></strong></p>
+                    <div class="mb-3">
+                        <label for="nomeComponente" class="form-label">Nome do Componente *</label>
+                        <input type="text" class="form-control" id="nomeComponente" name="nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tagComponente" class="form-label">Tag/Identificação</label>
+                        <input type="text" class="form-control" id="tagComponente" name="tag">
+                    </div>
+                    <div class="mb-3">
+                        <label for="vidaUtilComponente" class="form-label">Vida Útil Estimada (horas)</label>
+                        <input type="number" step="0.01" class="form-control" id="vidaUtilComponente" name="vida_util_estimada">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -247,6 +301,12 @@ function showEquipamentoModal(subconjuntoId, subconjuntoNome) {
     document.getElementById('subconjuntoNome').textContent = subconjuntoNome;
     document.getElementById('formEquipamento').action = `/subconjuntos/${subconjuntoId}/equipamento`;
     new bootstrap.Modal(document.getElementById('modalNovoEquipamento')).show();
+}
+
+function showComponenteModal(equipamentoId, equipamentoNome) {
+    document.getElementById('equipamentoNome').textContent = equipamentoNome;
+    document.getElementById('formComponente').action = `/equipamentos/${equipamentoId}/componente`;
+    new bootstrap.Modal(document.getElementById('modalNovoComponente')).show();
 }
 </script>
 {% endblock %}
