@@ -1,0 +1,51 @@
+Erro indefinido
+jinja2.exceptions.UndefinedError: 'agora' é indefinido
+
+Traceback (última chamada mais recente)
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py" , linha 1536 , em__call__
+retornar self.wsgi_app(ambiente, iniciar_resposta)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py" , linha 1514 , emwsgi_app
+resposta = self.handle_exception(e)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py" , linha 1511 , emwsgi_app
+resposta = self.full_dispatch_request()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py" , linha 919 , emfull_dispatch_request
+rv = self.handle_user_exception(e)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py" , linha 917 , emfull_dispatch_request
+rv = self.dispatch_request()
+      ^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py" , linha 902 , emdispatch_request
+retornar self.ensure_sync(self.view_functions[rule.endpoint])(**view_args) # tipo: ignorar[nenhum-retorno]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py" , linha 290 , emdecorated_view
+retornar current_app.ensure_sync(func)(*args, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/routes.py" , linha 647 , emrelatorio_ordem_pdf
+return gerar_pdf('relatorio_ordem.html', ordem=ordem)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/utils.py" , linha 8 , emgerar_pdf
+html_out = render_template(modelo, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/templating.py" , linha 150 , emrender_template
+retornar _render(aplicativo, modelo, contexto)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/templating.py" , linha 131 , em_render
+rv = modelo.render(contexto)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py" , linha 1295 , emrender
+self.environment.handle_exception()
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py" , linha 942 , emhandle_exception
+aumentar rewrite_traceback_stack(fonte=fonte)
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arquivo "/home/runner/workspace/templates/relatorio_ordem.html" , linha 20 , emtop-level template code
+content: "Página " counter(page) " de " counter(pages) " | PlanCheck | Gerado em {{ now().strftime('%d/%m/%Y %H:%M') }}";
+Arquivo "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/jinja2/utils.py" , linha 92 , emfrom_obj
+se hasattr(obj, "jinja_pass_arg"):
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'agora' é indefinido
+O depurador detectou uma exceção no seu aplicativo WSGI. Agora você pode verificar o traceback que levou ao erro.
+Para alternar entre o traceback interativo e o texto simples, você pode clicar no título "Traceback". A partir do traceback de texto, você também pode criar uma cópia dele.

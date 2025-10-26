@@ -643,8 +643,9 @@ def relatorio_plano_excel(plano_id):
 @main_bp.route('/relatorios/ordens/<int:ordem_id>/pdf')
 @login_required
 def relatorio_ordem_pdf(ordem_id):
+    from datetime import datetime
     ordem = OrdemExecucao.query.get_or_404(ordem_id)
-    return gerar_pdf('relatorio_ordem.html', ordem=ordem)
+    return gerar_pdf('relatorio_ordem.html', ordem=ordem, data_geracao=datetime.now())
 
 @main_bp.route('/relatorios/ordens/<int:ordem_id>/excel')
 @login_required

@@ -17,7 +17,7 @@
             
             /* Definição de rodapé fixo */
             @bottom-center {
-                content: "Página " counter(page) " de " counter(pages) " | PlanCheck | Gerado em {{ now().strftime('%d/%m/%Y %H:%M') }}";
+                content: "Página " counter(page) " de " counter(pages) " | PlanCheck | Gerado em {{ data_geracao.strftime('%d/%m/%Y %H:%M') }}";
                 font-family: Arial, sans-serif;
                 font-size: 8pt;
                 color: #555;
