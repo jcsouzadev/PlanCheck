@@ -46,6 +46,11 @@ class Empresa(db.Model):
     __tablename__ = 'empresa'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
+    cnpj = db.Column(db.String(18))  # Formato: XX.XXX.XXX/XXXX-XX
+    cep = db.Column(db.String(10))   # Formato: XXXXX-XXX
+    cidade = db.Column(db.String(100))
+    pais = db.Column(db.String(100), default='Brasil')
+    logo_filename = db.Column(db.String(255))  # Nome do arquivo do logo
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
     setores = db.relationship('Setor', backref='empresa', cascade='all, delete-orphan', lazy=True)

@@ -9,6 +9,9 @@ from functools import wraps
 # IMPORTAÇÕES ESSENCIAIS PARA OTIMIZAÇÃO DE CONSULTAS
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
+# IMPORTAÇÕES PARA UPLOAD DE ARQUIVOS
+import os
+from werkzeug.utils import secure_filename
 
 main_bp = Blueprint('main', __name__)
 
@@ -96,6 +99,53 @@ def editar_empresa(empresa_id):
         nome = request.form.get('nome')
         if nome:
             empresa.nome = nome
+            empresa.cnpj = request.form.get('cnpj', '').strip()
+            empresa.cep = request.form.get('cep', '').strip()
+            empresa.cidade = request.form.get('cidade', '').strip()
+            empresa.pais = request.form.get('pais', 'Brasil').strip()
+            
+            # Processar upload de logo
+            if 'logo' in request.files:
+                file = request.files['logo']
+                if file and file.filename:
+                    # Validar tamanho do arquivo (máx 2MB)
+                    file.seek(0, os.SEEK_END)
+                    file_size = file.tell()
+                    file.seek(0)
+                    
+                    if file_size > 2 * 1024 * 1024:  # 2MB
+                        flash('Arquivo muito grande. Tamanho máximo: 2MB', 'danger')
+                    else:
+                        # Validar extensão
+                        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+                        filename = secure_filename(file.filename)
+                        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+                        
+                        if ext not in allowed_extensions:
+                            flash('Formato de arquivo não permitido. Use JPG, PNG ou GIF.', 'danger')
+                        else:
+                            # Criar pasta static/logos se não existir
+                            upload_folder = os.path.join('static', 'logos')
+                            os.makedirs(upload_folder, exist_ok=True)
+                            
+                            # Gerar nome único para o arquivo
+                            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                            new_filename = f"empresa_{empresa.id}_{timestamp}.{ext}"
+                            filepath = os.path.join(upload_folder, new_filename)
+                            
+                            # Remover logo anterior se existir
+                            if empresa.logo_filename:
+                                old_filepath = os.path.join(upload_folder, empresa.logo_filename)
+                                if os.path.exists(old_filepath):
+                                    try:
+                                        os.remove(old_filepath)
+                                    except:
+                                        pass
+                            
+                            # Salvar novo arquivo
+                            file.save(filepath)
+                            empresa.logo_filename = new_filename
+            
             db.session.commit()
             flash('Empresa atualizada com sucesso!', 'success')
             return redirect(url_for('main.empresas'))

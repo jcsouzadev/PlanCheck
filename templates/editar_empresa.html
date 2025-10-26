@@ -16,17 +16,63 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Dados da Empresa</h5>
             </div>
             <div class="card-body">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="nome" class="form-label">Nome da Empresa</label>
-                        <input type="text" class="form-control" id="nome" name="nome" value="{{ empresa.nome }}" required>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="nome" class="form-label">Nome da Empresa *</label>
+                            <input type="text" class="form-control" id="nome" name="nome" value="{{ empresa.nome }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="cnpj" class="form-label">CNPJ</label>
+                            <input type="text" class="form-control" id="cnpj" name="cnpj" 
+                                   value="{{ empresa.cnpj or '' }}" 
+                                   placeholder="00.000.000/0000-00"
+                                   maxlength="18">
+                        </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="cep" class="form-label">CEP</label>
+                            <input type="text" class="form-control" id="cep" name="cep" 
+                                   value="{{ empresa.cep or '' }}" 
+                                   placeholder="00000-000"
+                                   maxlength="10">
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label for="cidade" class="form-label">Cidade</label>
+                            <input type="text" class="form-control" id="cidade" name="cidade" 
+                                   value="{{ empresa.cidade or '' }}" 
+                                   placeholder="São Paulo">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="pais" class="form-label">País</label>
+                            <input type="text" class="form-control" id="pais" name="pais" 
+                                   value="{{ empresa.pais or 'Brasil' }}" 
+                                   placeholder="Brasil">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Logo da Empresa</label>
+                        {% if empresa.logo_filename %}
+                        <div class="mb-2">
+                            <img src="{{ url_for('static', filename='logos/' + empresa.logo_filename) }}" 
+                                 alt="Logo atual" 
+                                 style="max-height: 80px; border: 1px solid #C7D7E4; padding: 8px; border-radius: 4px;">
+                            <small class="d-block text-muted mt-1">Logo atual</small>
+                        </div>
+                        {% endif %}
+                        <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                        <small class="form-text text-muted">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</small>
+                    </div>
+
                     <div class="d-flex gap-2">
                         <a href="{{ url_for('main.empresas') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Cancelar
