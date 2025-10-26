@@ -391,6 +391,81 @@ def deletar_componente(componente_id):
     return redirect(url_for('main.ver_empresa', empresa_id=empresa_id))
 
 # ==============================================================================
+# Rotas AJAX (JSON) para exclusão via JavaScript
+# ==============================================================================
+@main_bp.route('/setores/<int:setor_id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_setor_ajax(setor_id):
+    try:
+        setor = Setor.query.get_or_404(setor_id)
+        db.session.delete(setor)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/areas/<int:area_id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_area_ajax(area_id):
+    try:
+        area = Area.query.get_or_404(area_id)
+        db.session.delete(area)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/conjuntos/<int:conjunto_id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_conjunto_ajax(conjunto_id):
+    try:
+        conjunto = Conjunto.query.get_or_404(conjunto_id)
+        db.session.delete(conjunto)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/subconjuntos/<int:subconjunto_id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_subconjunto_ajax(subconjunto_id):
+    try:
+        subconjunto = Subconjunto.query.get_or_404(subconjunto_id)
+        db.session.delete(subconjunto)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/equipamentos/<int:equipamento_id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_equipamento_ajax(equipamento_id):
+    try:
+        equipamento = Equipamento.query.get_or_404(equipamento_id)
+        db.session.delete(equipamento)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/componentes/<int:componente_id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_componente_ajax(componente_id):
+    try:
+        componente = Componente.query.get_or_404(componente_id)
+        db.session.delete(componente)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+# ==============================================================================
 # Rotas de Planos de Inspeção
 # ==============================================================================
 @main_bp.route('/planos', methods=['GET', 'POST'])

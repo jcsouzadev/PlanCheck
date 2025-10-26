@@ -37,9 +37,11 @@ Sistema web completo para gestão de planos de manutenção e inspeção de equi
 ## Funcionalidades Principais
 
 ### 1. Hierarquia de Equipamentos
-- Estrutura completa: Empresa → Setor → Área → Conjunto → Subconjunto → Equipamento
-- CRUD completo para todos os níveis da hierarquia
-- Visualização em árvore expansível
+- Estrutura completa: Empresa → Setor → Área → Conjunto → Subconjunto → Equipamento → Componente
+- **CRUD completo para todos os níveis da hierarquia** com botões visuais de edição (caneta) e exclusão (lixeira)
+- Visualização em árvore expansível e interativa
+- Exclusão em cascata (aviso ao usuário antes de confirmar)
+- Interface AJAX para exclusões sem recarregamento total da página
 
 ### 2. Planos de Inspeção
 - Criação de planos vinculados a equipamentos
@@ -260,4 +262,4 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 ✅ Sistema rodando na porta 5000
 
 ## Última Atualização
-07 de outubro de 2025 - Dashboard reformulado com gráfico de barras agrupadas mensal e lista interativa de ordens com filtros de data
+26 de outubro de 2025 - Adicionados ícones de edição e exclusão em toda a estrutura hierárquica com confirmação via JavaScript e rotas AJAX. Corrigido erro de exportação PDF (variável data_geracao). Componentes totalmente integrados na visualização hierárquica.

@@ -29,10 +29,18 @@
                 <div class="accordion" id="accordionSetores">
                     {% for setor in empresa.setores %}
                     <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#setor{{ setor.id }}">
+                        <h2 class="accordion-header d-flex align-items-center">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#setor{{ setor.id }}" style="flex: 1;">
                                 <i class="bi bi-box-seam me-2"></i> Setor: {{ setor.nome }}
                             </button>
+                            <div class="btn-group me-2" role="group">
+                                <a href="{{ url_for('main.editar_setor', setor_id=setor.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao('setor', {{ setor.id }}, '{{ setor.nome }}')" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </h2>
                         <div id="setor{{ setor.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSetores">
                             <div class="accordion-body">
@@ -42,9 +50,19 @@
                                 {% if setor.areas %}
                                     {% for area in setor.areas %}
                                     <div class="card mb-2">
-                                        <div class="card-header bg-light">
-                                            <strong><i class="bi bi-geo-alt"></i> Área: {{ area.nome }}</strong>
-                                            <button type="button" class="btn btn-sm btn-success float-end" onclick="showConjuntoModal({{ area.id }}, '{{ area.nome }}')">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong><i class="bi bi-geo-alt"></i> Área: {{ area.nome }}</strong>
+                                                <div class="btn-group btn-group-sm ms-2" role="group">
+                                                    <a href="{{ url_for('main.editar_area', area_id=area.id) }}" class="btn btn-outline-primary" title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-danger" onclick="confirmarExclusao('area', {{ area.id }}, '{{ area.nome }}')" title="Excluir">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-success" onclick="showConjuntoModal({{ area.id }}, '{{ area.nome }}')">
                                                 <i class="bi bi-plus"></i> Adicionar Conjunto
                                             </button>
                                         </div>
@@ -52,17 +70,41 @@
                                             {% if area.conjuntos %}
                                                 {% for conjunto in area.conjuntos %}
                                                 <div class="ms-3 mb-2">
-                                                    <strong><i class="bi bi-collection"></i> Conjunto: {{ conjunto.nome }}</strong>
-                                                    <button type="button" class="btn btn-sm btn-success" onclick="showSubconjuntoModal({{ conjunto.id }}, '{{ conjunto.nome }}')">
-                                                        <i class="bi bi-plus"></i> Adicionar Subconjunto
-                                                    </button>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <strong><i class="bi bi-collection"></i> Conjunto: {{ conjunto.nome }}</strong>
+                                                            <div class="btn-group btn-group-sm ms-2" role="group">
+                                                                <a href="{{ url_for('main.editar_conjunto', conjunto_id=conjunto.id) }}" class="btn btn-outline-primary" title="Editar">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <button type="button" class="btn btn-outline-danger" onclick="confirmarExclusao('conjunto', {{ conjunto.id }}, '{{ conjunto.nome }}')" title="Excluir">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-success" onclick="showSubconjuntoModal({{ conjunto.id }}, '{{ conjunto.nome }}')">
+                                                            <i class="bi bi-plus"></i> Adicionar Subconjunto
+                                                        </button>
+                                                    </div>
                                                     {% if conjunto.subconjuntos %}
                                                         {% for subconjunto in conjunto.subconjuntos %}
                                                         <div class="ms-3 mb-2">
-                                                            <strong><i class="bi bi-grid"></i> Subconjunto: {{ subconjunto.nome }}</strong>
-                                                            <button type="button" class="btn btn-sm btn-success" onclick="showEquipamentoModal({{ subconjunto.id }}, '{{ subconjunto.nome }}')">
-                                                                <i class="bi bi-plus"></i> Adicionar Equipamento
-                                                            </button>
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <strong><i class="bi bi-grid"></i> Subconjunto: {{ subconjunto.nome }}</strong>
+                                                                    <div class="btn-group btn-group-sm ms-2" role="group">
+                                                                        <a href="{{ url_for('main.editar_subconjunto', subconjunto_id=subconjunto.id) }}" class="btn btn-outline-primary" title="Editar">
+                                                                            <i class="bi bi-pencil"></i>
+                                                                        </a>
+                                                                        <button type="button" class="btn btn-outline-danger" onclick="confirmarExclusao('subconjunto', {{ subconjunto.id }}, '{{ subconjunto.nome }}')" title="Excluir">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" class="btn btn-sm btn-success" onclick="showEquipamentoModal({{ subconjunto.id }}, '{{ subconjunto.nome }}')">
+                                                                    <i class="bi bi-plus"></i> Adicionar Equipamento
+                                                                </button>
+                                                            </div>
                                                             {% if subconjunto.equipamentos %}
                                                             <ul class="list-group list-group-flush ms-3 mt-2">
                                                                 {% for equipamento in subconjunto.equipamentos %}
@@ -73,6 +115,14 @@
                                                                             {% if equipamento.codigo %}<span class="badge bg-secondary">{{ equipamento.codigo }}</span>{% endif %}
                                                                             <span class="badge bg-info">{{ equipamento.planos|length }} planos</span>
                                                                             <span class="badge bg-warning text-dark">{{ equipamento.componentes|length }} componentes</span>
+                                                                            <div class="btn-group btn-group-sm ms-2" role="group">
+                                                                                <a href="{{ url_for('main.editar_equipamento', equipamento_id=equipamento.id) }}" class="btn btn-outline-primary" title="Editar">
+                                                                                    <i class="bi bi-pencil"></i>
+                                                                                </a>
+                                                                                <button type="button" class="btn btn-outline-danger" onclick="confirmarExclusao('equipamento', {{ equipamento.id }}, '{{ equipamento.nome }}')" title="Excluir">
+                                                                                    <i class="bi bi-trash"></i>
+                                                                                </button>
+                                                                            </div>
                                                                         </div>
                                                                         <button type="button" class="btn btn-sm btn-success" onclick="showComponenteModal({{ equipamento.id }}, '{{ equipamento.nome }}')">
                                                                             <i class="bi bi-plus"></i> Adicionar Componente
@@ -81,13 +131,23 @@
                                                                     {% if equipamento.componentes %}
                                                                     <ul class="list-unstyled ms-4 mt-2">
                                                                         {% for componente in equipamento.componentes %}
-                                                                        <li class="mb-1">
-                                                                            <i class="bi bi-puzzle text-warning"></i> 
-                                                                            <strong>{{ componente.nome }}</strong>
-                                                                            {% if componente.tag %}<span class="badge bg-secondary">{{ componente.tag }}</span>{% endif %}
-                                                                            {% if componente.vida_util_estimada %}
-                                                                            <small class="text-muted">(Vida útil: {{ componente.vida_util_estimada }}h)</small>
-                                                                            {% endif %}
+                                                                        <li class="mb-1 d-flex justify-content-between align-items-center">
+                                                                            <div>
+                                                                                <i class="bi bi-puzzle text-warning"></i> 
+                                                                                <strong>{{ componente.nome }}</strong>
+                                                                                {% if componente.tag %}<span class="badge bg-secondary">{{ componente.tag }}</span>{% endif %}
+                                                                                {% if componente.vida_util_estimada %}
+                                                                                <small class="text-muted">(Vida útil: {{ componente.vida_util_estimada }}h)</small>
+                                                                                {% endif %}
+                                                                            </div>
+                                                                            <div class="btn-group btn-group-sm" role="group">
+                                                                                <a href="{{ url_for('main.editar_componente', componente_id=componente.id) }}" class="btn btn-outline-primary btn-sm" title="Editar">
+                                                                                    <i class="bi bi-pencil"></i>
+                                                                                </a>
+                                                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmarExclusao('componente', {{ componente.id }}, '{{ componente.nome }}')" title="Excluir">
+                                                                                    <i class="bi bi-trash"></i>
+                                                                                </button>
+                                                                            </div>
                                                                         </li>
                                                                         {% endfor %}
                                                                     </ul>
@@ -307,6 +367,37 @@ function showComponenteModal(equipamentoId, equipamentoNome) {
     document.getElementById('equipamentoNome').textContent = equipamentoNome;
     document.getElementById('formComponente').action = `/equipamentos/${equipamentoId}/componente`;
     new bootstrap.Modal(document.getElementById('modalNovoComponente')).show();
+}
+
+function confirmarExclusao(tipo, id, nome) {
+    if (confirm(`Tem certeza que deseja excluir ${tipo} "${nome}"?\n\nAtenção: Isso excluirá todos os itens relacionados na hierarquia!`)) {
+        const urls = {
+            'setor': `/setores/${id}/excluir`,
+            'area': `/areas/${id}/excluir`,
+            'conjunto': `/conjuntos/${id}/excluir`,
+            'subconjunto': `/subconjuntos/${id}/excluir`,
+            'equipamento': `/equipamentos/${id}/excluir`,
+            'componente': `/componentes/${id}/excluir`
+        };
+        
+        fetch(urls[tipo], {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao excluir: ' + (data.error || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            alert('Erro ao excluir: ' + error);
+        });
+    }
 }
 </script>
 {% endblock %}
