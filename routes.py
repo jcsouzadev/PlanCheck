@@ -488,24 +488,41 @@ def mapa_anual_planos():
     hoje = date.today()
     ano_atual = hoje.year
     
-    # Calcular a primeira semana do ano (ISO 8601: semana começa segunda)
+    # Gerar semanas dinamicamente usando ISO 8601 (suporta 52 ou 53 semanas)
     primeiro_dia = date(ano_atual, 1, 1)
-    dias_ate_segunda = (7 - primeiro_dia.weekday()) % 7
-    if dias_ate_segunda == 0 and primeiro_dia.weekday() != 0:
-        dias_ate_segunda = 7
-    primeira_segunda = primeiro_dia + timedelta(days=dias_ate_segunda if primeiro_dia.weekday() > 3 else -primeiro_dia.weekday())
+    ultimo_dia = date(ano_atual, 12, 31)
     
-    # Gerar as 52 semanas do ano
+    # Determinar quantas semanas ISO tem o ano atual
+    semanas_no_ano = ultimo_dia.isocalendar()[1]
+    if ultimo_dia.isocalendar()[0] != ano_atual:
+        # Última semana pertence ao próximo ano
+        semanas_no_ano = (ultimo_dia - timedelta(days=7)).isocalendar()[1]
+    
     semanas = []
-    for num_semana in range(1, 53):
-        inicio_semana = primeira_segunda + timedelta(weeks=num_semana - 1)
-        fim_semana = inicio_semana + timedelta(days=6)
-        semanas.append({
-            'numero': num_semana,
-            'inicio': inicio_semana,
-            'fim': fim_semana,
-            'mes': inicio_semana.strftime('%b')
-        })
+    # Encontrar o primeiro dia de cada semana ISO
+    data_atual = primeiro_dia
+    while data_atual.year == ano_atual or (data_atual.year == ano_atual + 1 and data_atual.isocalendar()[0] == ano_atual):
+        ano_iso, semana_iso, dia_semana = data_atual.isocalendar()
+        
+        if ano_iso == ano_atual:
+            # Encontrar a segunda-feira desta semana ISO
+            inicio_semana = data_atual - timedelta(days=dia_semana - 1)
+            fim_semana = inicio_semana + timedelta(days=6)
+            
+            # Evitar duplicatas
+            if not semanas or semanas[-1]['numero'] != semana_iso:
+                semanas.append({
+                    'numero': semana_iso,
+                    'inicio': inicio_semana,
+                    'fim': fim_semana,
+                    'mes': inicio_semana.strftime('%b')
+                })
+        
+        data_atual += timedelta(days=7)
+        
+        # Parar se já coletamos todas as semanas
+        if len(semanas) >= semanas_no_ano:
+            break
     
     # Para cada plano, calcular em quais semanas ele deve ser executado
     mapa_planos = []
@@ -518,25 +535,44 @@ def mapa_anual_planos():
         
         if plano.tipo_geracao == 'diario' and plano.frequencia:
             # Executar a cada X dias
-            data_atual = plano.data_inicio
-            while data_atual.year == ano_atual:
-                if data_atual >= primeiro_dia:
+            # Converter datetime para date se necessário
+            data_atual = plano.data_inicio.date() if hasattr(plano.data_inicio, 'date') else plano.data_inicio
+            # Continuar até passar do fim do ano atual
+            while data_atual <= ultimo_dia:
+                # Adicionar apenas datas dentro do ano atual
+                if data_atual >= primeiro_dia and data_atual <= ultimo_dia:
                     datas_previstas.append(data_atual)
-                data_atual = data_atual + timedelta(days=plano.frequencia)
+                data_atual = data_atual + timedelta(days=int(plano.frequencia))
         
         elif plano.tipo_geracao == 'por_hora' and plano.frequencia:
-            # Converter frequência de horas para dias (assumindo 24h/dia)
-            dias_frequencia = plano.frequencia / 24.0
-            data_atual = plano.data_inicio
-            while data_atual.year == ano_atual:
-                if data_atual >= primeiro_dia:
-                    datas_previstas.append(data_atual)
-                data_atual = data_atual + timedelta(days=dias_frequencia)
+            # Para frequências horárias, trabalhar com datetime para suportar sub-dia
+            # Converter para datetime se for date
+            if hasattr(plano.data_inicio, 'date'):
+                data_atual = plano.data_inicio
+            else:
+                from datetime import datetime as dt
+                data_atual = dt.combine(plano.data_inicio, dt.min.time())
+            
+            # Limites em datetime
+            from datetime import datetime as dt
+            ultimo_momento = dt.combine(ultimo_dia, dt.max.time())
+            
+            # Continuar até passar do fim do ano atual
+            while data_atual <= ultimo_momento:
+                # Adicionar apenas datas dentro do ano atual
+                data_apenas = data_atual.date()
+                if primeiro_dia <= data_apenas <= ultimo_dia:
+                    # Adicionar apenas uma vez por dia (evitar duplicatas)
+                    if not datas_previstas or datas_previstas[-1] != data_apenas:
+                        datas_previstas.append(data_apenas)
+                data_atual = data_atual + timedelta(hours=plano.frequencia)
         
         elif plano.tipo_geracao == 'data_abertura':
             # Apenas na data de início
-            if plano.data_inicio.year == ano_atual:
-                datas_previstas.append(plano.data_inicio)
+            # Converter datetime para date se necessário
+            data_inicio_date = plano.data_inicio.date() if hasattr(plano.data_inicio, 'date') else plano.data_inicio
+            if primeiro_dia <= data_inicio_date <= ultimo_dia:
+                datas_previstas.append(data_inicio_date)
         
         # Mapear datas para números de semana
         semanas_execucao = set()
