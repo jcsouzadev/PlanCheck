@@ -64,6 +64,50 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Tipos de Ordem</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="tipoOrdemChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Ordens Não Programadas</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="naoProgramadasChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white" style="background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-tools"></i> Estatísticas de Manutenções</h6>
+                <div id="statsNaoProgramadas">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span>Pendentes:</span>
+                        <h4 class="mb-0" id="statPendentes">-</h4>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span>Em Andamento:</span>
+                        <h4 class="mb-0" id="statEmAndamento">-</h4>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span>Concluídas:</span>
+                        <h4 class="mb-0" id="statConcluidas">-</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-7">
         <div class="card">
@@ -380,6 +424,64 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+    
+    // Carregar dados de tipos de ordem (Programadas vs Não Programadas)
+    fetch('/api/dashboard/tipo-ordem')
+        .then(response => response.json())
+        .then(data => {
+            const tipoOrdemCtx = document.getElementById('tipoOrdemChart').getContext('2d');
+            new Chart(tipoOrdemCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Programadas', 'Não Programadas'],
+                    datasets: [{
+                        data: [data.programadas, data.nao_programadas],
+                        backgroundColor: ['#295673', '#FFC107']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+    
+    // Carregar dados de status de ordens não programadas
+    fetch('/api/dashboard/nao-programadas-status')
+        .then(response => response.json())
+        .then(data => {
+            // Atualizar estatísticas no card
+            document.getElementById('statPendentes').textContent = data.pendentes;
+            document.getElementById('statEmAndamento').textContent = data.em_andamento;
+            document.getElementById('statConcluidas').textContent = data.concluidas;
+            
+            // Criar gráfico de rosca (doughnut)
+            const naoProgramadasCtx = document.getElementById('naoProgramadasChart').getContext('2d');
+            new Chart(naoProgramadasCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pendentes', 'Em Andamento', 'Concluídas'],
+                    datasets: [{
+                        data: [data.pendentes, data.em_andamento, data.concluidas],
+                        backgroundColor: ['#FFC107', '#295673', '#7AAD6B']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
                     plugins: {
                         legend: {
                             position: 'bottom'

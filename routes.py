@@ -1159,6 +1159,32 @@ def dashboard_ordens():
 
     return jsonify(ordens_lista)
 
+@main_bp.route('/api/dashboard/tipo-ordem')
+@login_required
+def dashboard_tipo_ordem():
+    """API para retornar dados de ordens programadas vs não programadas"""
+    total_programadas = OrdemExecucao.query.filter_by(tipo_ordem='programada').count()
+    total_nao_programadas = OrdemExecucao.query.filter_by(tipo_ordem='nao_programada').count()
+    
+    return jsonify({
+        'programadas': total_programadas,
+        'nao_programadas': total_nao_programadas
+    })
+
+@main_bp.route('/api/dashboard/nao-programadas-status')
+@login_required
+def dashboard_nao_programadas_status():
+    """API para retornar status de ordens não programadas"""
+    nao_programadas_pendentes = OrdemExecucao.query.filter_by(tipo_ordem='nao_programada', status='pendente').count()
+    nao_programadas_em_andamento = OrdemExecucao.query.filter_by(tipo_ordem='nao_programada', status='em_andamento').count()
+    nao_programadas_concluidas = OrdemExecucao.query.filter_by(tipo_ordem='nao_programada', status='concluida').count()
+    
+    return jsonify({
+        'pendentes': nao_programadas_pendentes,
+        'em_andamento': nao_programadas_em_andamento,
+        'concluidas': nao_programadas_concluidas
+    })
+
 # ==============================================================================
 # Rotas de CRUD de Usuários
 # ==============================================================================
