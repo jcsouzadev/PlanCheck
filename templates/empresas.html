@@ -36,6 +36,9 @@
                                     <a href="{{ url_for('main.ver_empresa', empresa_id=empresa.id) }}" class="btn btn-sm btn-info">
                                         <i class="bi bi-eye"></i> Ver Detalhes
                                     </a>
+                                    <a href="{{ url_for('main.editar_empresa', empresa_id=empresa.id) }}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
                                     <form method="POST" action="{{ url_for('main.deletar_empresa', empresa_id=empresa.id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta empresa? Todos os dados relacionados serão perdidos.');">
                                         <button type="submit" class="btn btn-sm btn-danger">
                                             <i class="bi bi-trash"></i> Excluir
