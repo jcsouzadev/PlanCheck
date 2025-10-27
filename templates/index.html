@@ -50,7 +50,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
+        <div class="card text-white bg-danger mb-3">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -226,7 +226,7 @@
 <script>
 function getStatusIcon(status_visual) {
     const icons = {
-        'pendente': '<i class="bi bi-clock-fill text-warning" title="Pendente"></i>',
+        'pendente': '<i class="bi bi-clock-fill text-danger" title="Pendente"></i>',
         'no_prazo': '<i class="bi bi-check-circle-fill text-success" title="No Prazo"></i>',
         'concluido': '<i class="bi bi-check-circle-fill text-success" title="Concluído"></i>',
         'atrasado': '<i class="bi bi-exclamation-triangle-fill text-danger" title="Atrasado"></i>',
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: 'Ordens',
                         data: [data.ordens.pendentes, data.ordens.em_andamento, data.ordens.concluidas],
-                        backgroundColor: ['#ffc107', '#295673', '#7AAD6B']
+                        backgroundColor: ['#DC3545', '#295673', '#7AAD6B']
                     }]
                 },
                 options: {
@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     labels: ['Pendentes', 'Em Andamento', 'Concluídas'],
                     datasets: [{
                         data: [data.pendentes, data.em_andamento, data.concluidas],
-                        backgroundColor: ['#FFC107', '#295673', '#7AAD6B']
+                        backgroundColor: ['#DC3545', '#295673', '#7AAD6B']
                     }]
                 },
                 options: {

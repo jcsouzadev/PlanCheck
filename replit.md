@@ -158,10 +158,10 @@ Os campos de não conformidade aparecem automaticamente quando um item é marcad
   - Usado em: Fundo do body, caixas de informação em relatórios
 
 - **#FFC107** - Amarelo (avisos)
-  - Usado em: Status "Pendente", alertas, medições fora da faixa
+  - Usado em: Alertas, medições fora da faixa, ordens não programadas (tipo)
 
-- **#DC3545** - Vermelho (perigo/erro)
-  - Usado em: Itens não conformes, erros, validações
+- **#DC3545** - Vermelho (perigo/erro/pendente)
+  - Usado em: Status "Pendente", itens não conformes, erros, validações, manutenções não planejadas
 
 A paleta foi aplicada de forma consistente em:
 - Todas as páginas HTML (login, dashboard, formulários)
