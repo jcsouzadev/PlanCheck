@@ -149,15 +149,38 @@ class ItemInspecao(db.Model):
 class OrdemExecucao(db.Model):
     __tablename__ = 'ordem_execucao'
     id = db.Column(db.Integer, primary_key=True)
-    plano_id = db.Column(db.Integer, db.ForeignKey('plano_inspecao.id'), nullable=False, index=True) # Otimização
-    executante_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True) # Otimização
-
-    data_programada = db.Column(db.DateTime, nullable=False, index=True) # Otimização
+    
+    # Tipo de ordem: 'programada' (vinda de plano) ou 'nao_programada' (manual)
+    tipo_ordem = db.Column(db.String(50), default='programada', nullable=False, index=True)
+    
+    # Relações (plano é nullable para ordens não programadas)
+    plano_id = db.Column(db.Integer, db.ForeignKey('plano_inspecao.id'), nullable=True, index=True)
+    executante_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    
+    # Para ordens não programadas - navegação hierárquica
+    setor_id = db.Column(db.Integer, db.ForeignKey('setor.id'), nullable=True, index=True)
+    area_id = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=True, index=True)
+    equipamento_id = db.Column(db.Integer, db.ForeignKey('equipamento.id'), nullable=True, index=True)
+    
+    # Campos de planejamento
+    data_programada = db.Column(db.DateTime, nullable=False, index=True)
+    servico_solicitado = db.Column(db.Text)  # Para ordens não programadas
+    tempo_previsto = db.Column(db.Float)  # Horas previstas
+    
+    # Campos de execução
+    data_hora_inicio = db.Column(db.DateTime)
+    data_hora_fim = db.Column(db.DateTime)
+    servico_executado = db.Column(db.Text)
+    diagnostico_falha = db.Column(db.Text)
     data_conclusao = db.Column(db.DateTime)
-    # AJUSTE: Adicionado index=True para otimizar filtros de status
-    status = db.Column(db.String(50), default='pendente', index=True) 
+    status = db.Column(db.String(50), default='pendente', index=True)
 
     itens_apontados = db.relationship('ItemInspecaoApontado', backref='ordem', cascade='all, delete-orphan', lazy=True)
+    
+    # Relacionamentos adicionais para ordens não programadas
+    setor = db.relationship('Setor', foreign_keys=[setor_id], backref='ordens')
+    area = db.relationship('Area', foreign_keys=[area_id], backref='ordens')
+    equipamento_direto = db.relationship('Equipamento', foreign_keys=[equipamento_id], backref='ordens_diretas')
 
 class ItemInspecaoApontado(db.Model):
     __tablename__ = 'item_inspecao_apontado'
