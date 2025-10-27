@@ -770,6 +770,7 @@ def gerar_ordem_automatica(plano_id):
         data_programada = datetime.now()
 
     ordem = OrdemExecucao(
+        tipo_ordem='programada',
         plano_id=plano_id,
         executante_id=executante_id,
         data_programada=data_programada
@@ -780,33 +781,74 @@ def gerar_ordem_automatica(plano_id):
     flash(f'Ordem gerada automaticamente para {data_programada.strftime("%d/%m/%Y %H:%M")}!', 'success')
     return redirect(url_for('main.ver_plano', plano_id=plano_id))
 
-@main_bp.route('/ordens', methods=['GET', 'POST'])
+@main_bp.route('/ordens')
 @login_required
 def ordens():
-    if request.method == 'POST' and current_user.is_admin():
-        plano_id = request.form.get('plano_id')
-        executante_id = request.form.get('executante_id')
-        data_programada_str = request.form.get('data_programada')
-
-        if plano_id and executante_id and data_programada_str:
-            ordem = OrdemExecucao(
-                plano_id=plano_id,
-                executante_id=executante_id,
-                data_programada=datetime.strptime(data_programada_str, '%Y-%m-%d')
-            )
-            db.session.add(ordem)
-            db.session.commit()
-            flash('Ordem de execução criada com sucesso!', 'success')
-        return redirect(url_for('main.ordens'))
-
     if current_user.is_admin():
         ordens = OrdemExecucao.query.order_by(OrdemExecucao.data_programada.desc()).all()
     else:
         ordens = OrdemExecucao.query.filter_by(executante_id=current_user.id).order_by(OrdemExecucao.data_programada.desc()).all()
 
-    planos = PlanoInspecao.query.all()
+    empresas = Empresa.query.all()
     executantes = User.query.all()
-    return render_template('ordens.html', ordens=ordens, planos=planos, executantes=executantes)
+    return render_template('ordens.html', ordens=ordens, empresas=empresas, executantes=executantes)
+
+@main_bp.route('/ordens/criar-nao-programada', methods=['POST'])
+@login_required
+@admin_required
+def criar_ordem_nao_programada():
+    setor_id = request.form.get('setor_id')
+    area_id = request.form.get('area_id')
+    equipamento_id = request.form.get('equipamento_id')
+    servico_solicitado = request.form.get('servico_solicitado')
+    tempo_previsto = request.form.get('tempo_previsto')
+    data_programada_str = request.form.get('data_programada')
+    executante_id = request.form.get('executante_id')
+
+    if not all([setor_id, area_id, equipamento_id, servico_solicitado, data_programada_str, executante_id]):
+        flash('Por favor, preencha todos os campos obrigatórios.', 'danger')
+        return redirect(url_for('main.ordens'))
+
+    ordem = OrdemExecucao(
+        tipo_ordem='nao_programada',
+        setor_id=setor_id,
+        area_id=area_id,
+        equipamento_id=equipamento_id,
+        servico_solicitado=servico_solicitado,
+        tempo_previsto=float(tempo_previsto) if tempo_previsto else None,
+        data_programada=datetime.strptime(data_programada_str, '%Y-%m-%d'),
+        executante_id=executante_id,
+        status='pendente'
+    )
+    db.session.add(ordem)
+    db.session.commit()
+    flash('Ordem não programada criada com sucesso!', 'success')
+    return redirect(url_for('main.ordens'))
+
+# APIs para seleção em cascata
+@main_bp.route('/api/setores/<int:empresa_id>')
+@login_required
+def api_setores(empresa_id):
+    setores = Setor.query.filter_by(empresa_id=empresa_id).all()
+    return jsonify([{'id': s.id, 'nome': s.nome} for s in setores])
+
+@main_bp.route('/api/areas/<int:setor_id>')
+@login_required
+def api_areas(setor_id):
+    areas = Area.query.filter_by(setor_id=setor_id).all()
+    return jsonify([{'id': a.id, 'nome': a.nome} for a in areas])
+
+@main_bp.route('/api/equipamentos/<int:area_id>')
+@login_required
+def api_equipamentos(area_id):
+    # Buscar todos os conjuntos da área
+    conjuntos = Conjunto.query.filter_by(area_id=area_id).all()
+    equipamentos = []
+    for conjunto in conjuntos:
+        for subconjunto in conjunto.subconjuntos:
+            for equip in subconjunto.equipamentos:
+                equipamentos.append({'id': equip.id, 'nome': equip.nome})
+    return jsonify(equipamentos)
 
 @main_bp.route('/ordens/<int:ordem_id>')
 @login_required

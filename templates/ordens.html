@@ -9,7 +9,7 @@
             <h1><i class="bi bi-list-check"></i> Ordens de Execução</h1>
             {% if current_user.is_admin() %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaOrdem">
-                <i class="bi bi-plus-circle"></i> Nova Ordem
+                <i class="bi bi-plus-circle"></i> Nova Ordem Não Programada
             </button>
             {% endif %}
         </div>
@@ -24,7 +24,9 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Plano</th>
+                                <th>Tipo</th>
+                                <th>Plano/Serviço</th>
+                                <th>Equipamento</th>
                                 <th>Executante</th>
                                 <th>Data Programada</th>
                                 <th>Status</th>
@@ -34,8 +36,30 @@
                         <tbody>
                             {% for ordem in ordens %}
                             <tr>
-                                <td><strong>{{ ordem.plano.titulo if ordem.plano else '-' }}</strong></td>
-                                <td>{{ ordem.executante.username if ordem.executante else '-' }}</td>
+                                <td>
+                                    {% if ordem.tipo_ordem == 'programada' %}
+                                    <span class="badge" style="background-color: #7AAD6B; color: white;">Programada</span>
+                                    {% else %}
+                                    <span class="badge" style="background-color: #FFC107; color: #333;">Não Programada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ordem.tipo_ordem == 'programada' %}
+                                    <strong>{{ ordem.plano.titulo if ordem.plano else '-' }}</strong>
+                                    {% else %}
+                                    {{ ordem.servico_solicitado[:50] + '...' if ordem.servico_solicitado and ordem.servico_solicitado|length > 50 else ordem.servico_solicitado or '-' }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ordem.tipo_ordem == 'programada' and ordem.plano and ordem.plano.equipamento %}
+                                    {{ ordem.plano.equipamento.nome }}
+                                    {% elif ordem.tipo_ordem == 'nao_programada' and ordem.equipamento_direto %}
+                                    {{ ordem.equipamento_direto.nome }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>{{ ordem.executante.nome if ordem.executante and ordem.executante.nome else (ordem.executante.username if ordem.executante else '-') }}</td>
                                 <td>{{ ordem.data_programada.strftime('%d/%m/%Y') if ordem.data_programada else '-' }}</td>
                                 <td>
                                     {% if ordem.status == 'pendente' %}
@@ -59,7 +83,7 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="5" class="text-center text-muted">Nenhuma ordem cadastrada</td>
+                                <td colspan="7" class="text-center text-muted">Nenhuma ordem cadastrada</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -72,44 +96,144 @@
 
 {% if current_user.is_admin() %}
 <div class="modal fade" id="modalNovaOrdem" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nova Ordem de Execução</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <form method="POST" action="{{ url_for('main.criar_ordem_nao_programada') }}">
+                <div class="modal-header" style="background-color: #295673; color: white;">
+                    <h5 class="modal-title"><i class="bi bi-clipboard-plus"></i> Nova Ordem Não Programada</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="plano_id" class="form-label">Plano de Inspeção</label>
-                        <select class="form-select" id="plano_id" name="plano_id" required>
-                            <option value="">Selecione um plano</option>
-                            {% for plano in planos %}
-                            <option value="{{ plano.id }}">{{ plano.titulo }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empresa_id" class="form-label">Empresa *</label>
+                            <select class="form-select" id="empresa_id" name="empresa_id" required>
+                                <option value="">Selecione...</option>
+                                {% for empresa in empresas %}
+                                <option value="{{ empresa.id }}">{{ empresa.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="setor_id" class="form-label">Setor *</label>
+                            <select class="form-select" id="setor_id" name="setor_id" required>
+                                <option value="">Selecione empresa primeiro...</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="executante_id" class="form-label">Executante</label>
-                        <select class="form-select" id="executante_id" name="executante_id" required>
-                            <option value="">Selecione um executante</option>
-                            {% for executante in executantes %}
-                            <option value="{{ executante.id }}">{{ executante.username }}</option>
-                            {% endfor %}
-                        </select>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="area_id" class="form-label">Área *</label>
+                            <select class="form-select" id="area_id" name="area_id" required>
+                                <option value="">Selecione setor primeiro...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="equipamento_id" class="form-label">Equipamento *</label>
+                            <select class="form-select" id="equipamento_id" name="equipamento_id" required>
+                                <option value="">Selecione área primeiro...</option>
+                            </select>
+                        </div>
                     </div>
+
                     <div class="mb-3">
-                        <label for="data_programada" class="form-label">Data Programada</label>
-                        <input type="date" class="form-control" id="data_programada" name="data_programada" required>
+                        <label for="servico_solicitado" class="form-label">Serviço Solicitado *</label>
+                        <textarea class="form-control" id="servico_solicitado" name="servico_solicitado" rows="3" required placeholder="Descreva o serviço a ser realizado..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="tempo_previsto" class="form-label">Tempo Previsto (horas)</label>
+                            <input type="number" step="0.5" class="form-control" id="tempo_previsto" name="tempo_previsto" placeholder="Ex: 2.5">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="data_programada_nao_prog" class="form-label">Data Programada *</label>
+                            <input type="date" class="form-control" id="data_programada_nao_prog" name="data_programada" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="executante_id" class="form-label">Executante *</label>
+                            <select class="form-select" id="executante_id" name="executante_id" required>
+                                <option value="">Selecione...</option>
+                                {% for executante in executantes %}
+                                <option value="{{ executante.id }}">{{ executante.nome or executante.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Criar Ordem</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Criar Ordem
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Seleção em cascata: Empresa -> Setor -> Área -> Equipamento
+    const empresaSelect = document.getElementById('empresa_id');
+    const setorSelect = document.getElementById('setor_id');
+    const areaSelect = document.getElementById('area_id');
+    const equipamentoSelect = document.getElementById('equipamento_id');
+
+    empresaSelect.addEventListener('change', async function() {
+        const empresaId = this.value;
+        setorSelect.innerHTML = '<option value="">Carregando...</option>';
+        areaSelect.innerHTML = '<option value="">Selecione setor primeiro...</option>';
+        equipamentoSelect.innerHTML = '<option value="">Selecione área primeiro...</option>';
+        
+        if (empresaId) {
+            const response = await fetch(`/api/setores/${empresaId}`);
+            const setores = await response.json();
+            setorSelect.innerHTML = '<option value="">Selecione...</option>';
+            setores.forEach(setor => {
+                setorSelect.innerHTML += `<option value="${setor.id}">${setor.nome}</option>`;
+            });
+        } else {
+            setorSelect.innerHTML = '<option value="">Selecione empresa primeiro...</option>';
+        }
+    });
+
+    setorSelect.addEventListener('change', async function() {
+        const setorId = this.value;
+        areaSelect.innerHTML = '<option value="">Carregando...</option>';
+        equipamentoSelect.innerHTML = '<option value="">Selecione área primeiro...</option>';
+        
+        if (setorId) {
+            const response = await fetch(`/api/areas/${setorId}`);
+            const areas = await response.json();
+            areaSelect.innerHTML = '<option value="">Selecione...</option>';
+            areas.forEach(area => {
+                areaSelect.innerHTML += `<option value="${area.id}">${area.nome}</option>`;
+            });
+        } else {
+            areaSelect.innerHTML = '<option value="">Selecione setor primeiro...</option>';
+        }
+    });
+
+    areaSelect.addEventListener('change', async function() {
+        const areaId = this.value;
+        equipamentoSelect.innerHTML = '<option value="">Carregando...</option>';
+        
+        if (areaId) {
+            const response = await fetch(`/api/equipamentos/${areaId}`);
+            const equipamentos = await response.json();
+            equipamentoSelect.innerHTML = '<option value="">Selecione...</option>';
+            equipamentos.forEach(equip => {
+                equipamentoSelect.innerHTML += `<option value="${equip.id}">${equip.nome}</option>`;
+            });
+        } else {
+            equipamentoSelect.innerHTML = '<option value="">Selecione área primeiro...</option>';
+        }
+    });
+});
+</script>
 {% endif %}
 {% endblock %}
