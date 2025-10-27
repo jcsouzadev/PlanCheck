@@ -11,7 +11,14 @@
                 <li class="breadcrumb-item active">Ordem #{{ ordem.id }}</li>
             </ol>
         </nav>
-        <h1 class="mb-4">Ordem de Execução #{{ ordem.id }}</h1>
+        <h1 class="mb-4">
+            Ordem de Execução #{{ ordem.id }}
+            {% if ordem.tipo_ordem == 'programada' %}
+            <span class="badge bg-primary">Programada</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">Não Programada</span>
+            {% endif %}
+        </h1>
     </div>
 </div>
 
@@ -22,11 +29,38 @@
                 <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações da Ordem</h5>
             </div>
             <div class="card-body">
-                <p><strong>Plano:</strong> {{ ordem.plano.titulo if ordem.plano else '-' }}</p>
-                <p><strong>Equipamento:</strong> {{ ordem.plano.equipamento.nome if ordem.plano and ordem.plano.equipamento else '-' }}</p>
-                <p><strong>Executante:</strong> {{ ordem.executante.username if ordem.executante else '-' }}</p>
+                <p><strong>Tipo:</strong> 
+                    {% if ordem.tipo_ordem == 'programada' %}
+                    <span class="badge bg-primary">Programada</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">Não Programada</span>
+                    {% endif %}
+                </p>
+                
+                {% if ordem.tipo_ordem == 'programada' %}
+                    <p><strong>Plano:</strong> {{ ordem.plano.titulo if ordem.plano else '-' }}</p>
+                    <p><strong>Equipamento:</strong> {{ ordem.plano.equipamento.nome if ordem.plano and ordem.plano.equipamento else '-' }}</p>
+                {% else %}
+                    {# Ordem Não Programada - Mostrar hierarquia navegacional #}
+                    {% if ordem.equipamento_direto %}
+                    <p><strong>Equipamento:</strong> {{ ordem.equipamento_direto.nome }}</p>
+                    {% endif %}
+                    {% if ordem.area %}
+                    <p><strong>Área:</strong> {{ ordem.area.nome }}</p>
+                    {% endif %}
+                    {% if ordem.setor %}
+                    <p><strong>Setor:</strong> {{ ordem.setor.nome }}</p>
+                    {% endif %}
+                    {% if ordem.servico_solicitado %}
+                    <p><strong>Serviço Solicitado:</strong> {{ ordem.servico_solicitado }}</p>
+                    {% endif %}
+                    {% if ordem.tempo_previsto %}
+                    <p><strong>Tempo Previsto:</strong> {{ ordem.tempo_previsto }} horas</p>
+                    {% endif %}
+                {% endif %}
+                
+                <p><strong>Executante:</strong> {{ ordem.executante.nome if ordem.executante else ordem.executante.username if ordem.executante else '-' }}</p>
                 <p><strong>Data Programada:</strong> {{ ordem.data_programada.strftime('%d/%m/%Y') if ordem.data_programada else '-' }}</p>
-                <p><strong>Data de Conclusão:</strong> {{ ordem.data_conclusao.strftime('%d/%m/%Y %H:%M') if ordem.data_conclusao else '-' }}</p>
                 <p><strong>Status:</strong> 
                     {% if ordem.status == 'pendente' %}
                     <span class="badge bg-warning text-dark">Pendente</span>
@@ -39,7 +73,57 @@
             </div>
         </div>
     </div>
+    
     <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Rastreamento de Execução</h5>
+            </div>
+            <div class="card-body">
+                {% if ordem.data_hora_inicio %}
+                <p><strong>Data/Hora Início:</strong> {{ ordem.data_hora_inicio.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% else %}
+                <p><strong>Data/Hora Início:</strong> <span class="text-muted">Não iniciada</span></p>
+                {% endif %}
+                
+                {% if ordem.data_hora_fim %}
+                <p><strong>Data/Hora Término:</strong> {{ ordem.data_hora_fim.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% else %}
+                <p><strong>Data/Hora Término:</strong> <span class="text-muted">Em andamento</span></p>
+                {% endif %}
+                
+                {% if ordem.data_hora_inicio and ordem.data_hora_fim %}
+                {% set duracao_segundos = (ordem.data_hora_fim - ordem.data_hora_inicio).total_seconds() %}
+                {% set duracao_horas = (duracao_segundos / 3600)|int %}
+                {% set duracao_minutos = ((duracao_segundos % 3600) / 60)|int %}
+                <p><strong>Duração:</strong> 
+                    <span class="badge bg-success">{{ duracao_horas }}h {{ duracao_minutos }}min</span>
+                </p>
+                {% endif %}
+                
+                {% if ordem.data_conclusao %}
+                <p><strong>Data de Conclusão:</strong> {{ ordem.data_conclusao.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% endif %}
+                
+                {% if ordem.servico_executado %}
+                <hr>
+                <p><strong>Serviço Executado:</strong></p>
+                <p class="text-muted">{{ ordem.servico_executado }}</p>
+                {% endif %}
+                
+                {% if ordem.diagnostico_falha %}
+                <hr>
+                <p><strong>Diagnóstico de Falha:</strong></p>
+                <p class="text-danger">{{ ordem.diagnostico_falha }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if ordem.tipo_ordem == 'programada' %}
+<div class="row">
+    <div class="col-md-12">
         <div class="card mb-3">
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Resumo da Execução</h5>
@@ -119,6 +203,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endif %}
 
 <div class="row mt-3">
