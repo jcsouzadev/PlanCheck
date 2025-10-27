@@ -98,9 +98,9 @@ Os campos de não conformidade aparecem automaticamente quando um item é marcad
 ### 6. Dashboard com Análises
 - Estatísticas em tempo real
 - **Tabela de Cumprimento de Planos**: Exibe equipamentos com total de ordens programadas, realizadas e % de cumprimento (cores indicam performance: verde ≥80%, amarelo ≥50%, vermelho <50%)
-- **Gráfico de Pizza - Tipos de Ordem**: Compara visualmente ordens Programadas vs Não Programadas
-- **Gráfico de Rosca - Status de Ordens Não Programadas**: Visualização de Pendentes, Em Andamento e Concluídas
-- **Card de Manutenções NÃO PLANEJADAS**: Exibe contadores de ordens não programadas por status em destaque vermelho (Pendentes, Em Andamento, Concluídas)
+- **Gráfico de Pizza - Tipos de Ordem**: Compara visualmente ordens Programadas (azul) vs Não Programadas (vermelho)
+- **Gráfico de Rosca - Status de Ordens Não Programadas**: Visualização de Pendentes (vermelho), Em Andamento (azul) e Concluídas (verde)
+- **Card de Manutenções NÃO PROGRAMADAS**: Exibe contadores de ordens não programadas por status em destaque vermelho (Pendentes, Em Andamento, Concluídas)
 - Gráfico de barras: Status das ordens
 - Gráfico de linha temporal: Evolução das inspeções (últimas 30 ordens)
 - Cards informativos: Total de empresas, planos e ordens
@@ -158,10 +158,10 @@ Os campos de não conformidade aparecem automaticamente quando um item é marcad
   - Usado em: Fundo do body, caixas de informação em relatórios
 
 - **#FFC107** - Amarelo (avisos)
-  - Usado em: Alertas, medições fora da faixa, ordens não programadas (tipo)
+  - Usado em: Alertas, medições fora da faixa
 
-- **#DC3545** - Vermelho (perigo/erro/pendente)
-  - Usado em: Status "Pendente", itens não conformes, erros, validações, manutenções não planejadas
+- **#DC3545** - Vermelho (perigo/erro/pendente/não programada)
+  - Usado em: Status "Pendente", ordens não programadas, itens não conformes, erros, validações, card de manutenções não programadas
 
 A paleta foi aplicada de forma consistente em:
 - Todas as páginas HTML (login, dashboard, formulários)
@@ -289,10 +289,10 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 
 ## Última Atualização
 27 de outubro de 2025 - **Dashboard Aprimorado com Análise de Ordens Não Programadas**: Adicionados três novos elementos visuais ao dashboard:
-1. **Gráfico de Pizza**: Comparação visual entre ordens Programadas e Não Programadas
-2. **Gráfico de Rosca**: Status detalhado das ordens não programadas (Pendentes, Em Andamento, Concluídas)
-3. **Card de Manutenções NÃO PLANEJADAS**: Apresenta contadores de ordens não programadas por status em um card com gradiente vermelho (#DC3545 → #C82333)
+1. **Gráfico de Pizza - Tipos de Ordem**: Comparação visual entre ordens Programadas (azul #295673) e Não Programadas (vermelho #DC3545)
+2. **Gráfico de Rosca - Status**: Visualização de Pendentes (vermelho), Em Andamento (azul) e Concluídas (verde)
+3. **Card de Manutenções NÃO PROGRAMADAS**: Contadores por status em gradiente vermelho (#DC3545 → #C82333)
 Criadas duas novas APIs REST:
 - `/api/dashboard/tipo-ordem`: Retorna total de ordens programadas e não programadas
 - `/api/dashboard/nao-programadas-status`: Retorna breakdown de status de ordens não programadas
-Interface construída com Chart.js usando paleta de cores "Pentire Cool Summer Day" para consistência visual.
+Padronização de cores: Vermelho (#DC3545) representa tudo relacionado a "Pendente" e "Não Programada" em todo o sistema.
