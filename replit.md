@@ -39,6 +39,11 @@ Sistema web completo para gestão de planos de manutenção e inspeção de equi
 ### 1. Hierarquia de Equipamentos
 - Estrutura completa: Empresa → Setor → Área → Conjunto → Subconjunto → Equipamento → Componente
 - **CRUD completo para todos os níveis da hierarquia** com botões visuais de edição (caneta) e exclusão (lixeira)
+- **Cadastro de Empresa Completo**:
+  - Nome da empresa (obrigatório)
+  - CNPJ (formatado XX.XXX.XXX/XXXX-XX)
+  - Endereço completo: CEP, Cidade, País
+  - Logo/Imagem da empresa (upload com validação: JPG, PNG, GIF até 2MB)
 - Visualização em árvore expansível e interativa
 - Exclusão em cascata (aviso ao usuário antes de confirmar)
 - Interface AJAX para exclusões sem recarregamento total da página
@@ -68,9 +73,13 @@ Os campos de não conformidade aparecem automaticamente quando um item é marcad
 - Outras informações
 
 ### 5. Relatórios
-- Exportação em PDF com layout profissional
+- **Exportação em PDF com layout profissional formato A4:**
+  - **Cabeçalho**: Logo da empresa + Nome da empresa + CNPJ
+  - **Corpo**: Detalhes completos da ordem de serviço
+  - **Rodapé**: Endereço completo da empresa (CEP, Cidade, País)
 - Exportação em Excel para análise de dados
 - Relatórios por plano com todos os itens de inspeção
+- Relatórios por ordem de execução (PDF/Excel)
 
 ### 6. Dashboard com Análises
 - Estatísticas em tempo real
@@ -262,4 +271,4 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 ✅ Sistema rodando na porta 5000
 
 ## Última Atualização
-26 de outubro de 2025 - Adicionados ícones de edição e exclusão em toda a estrutura hierárquica com confirmação via JavaScript e rotas AJAX. Corrigido erro de exportação PDF (variável data_geracao). Componentes totalmente integrados na visualização hierárquica.
+27 de outubro de 2025 - Implementados campos adicionais no cadastro de empresas (CNPJ, CEP, Cidade, País e upload de logo com validações de segurança). Relatórios de ordem de serviço em PDF agora exibem logo e CNPJ da empresa no cabeçalho e endereço completo no rodapé. Corrigido loop infinito no mapa anual de 52 semanas para planos com frequência horária sub-diária.
