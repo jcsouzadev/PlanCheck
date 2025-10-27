@@ -905,7 +905,15 @@ def relatorio_plano_excel(plano_id):
 def relatorio_ordem_pdf(ordem_id):
     from datetime import datetime
     ordem = OrdemExecucao.query.get_or_404(ordem_id)
-    return gerar_pdf('relatorio_ordem.html', ordem=ordem, data_geracao=datetime.now())
+    
+    # Construir caminho absoluto do logo se existir
+    logo_path = None
+    if ordem.plano and ordem.plano.equipamento:
+        empresa = ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa
+        if empresa.logo_filename:
+            logo_path = os.path.abspath(os.path.join('static', 'logos', empresa.logo_filename))
+    
+    return gerar_pdf('relatorio_ordem.html', ordem=ordem, data_geracao=datetime.now(), logo_path=logo_path)
 
 @main_bp.route('/relatorios/ordens/<int:ordem_id>/excel')
 @login_required
