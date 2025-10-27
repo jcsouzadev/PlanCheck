@@ -58,10 +58,24 @@ Sistema web completo para gestão de planos de manutenção e inspeção de equi
   - **Medições/Grandezas**: Valores numéricos com limites min/max configuráveis
 
 ### 3. Ordens de Execução
-- Geração de ordens vinculadas a planos
+- **Dois tipos de ordens:**
+  - **Programadas**: Geradas automaticamente a partir de planos de inspeção com checklist completo
+  - **Não Programadas**: Criadas manualmente para manutenções corretivas ou trabalhos não planejados
+- **Criação de ordens não programadas:**
+  - Seleção hierárquica em cascata: Empresa → Setor → Área → Equipamento
+  - Definição de serviço solicitado e tempo previsto
+  - Atribuição a múltiplos executantes
+  - APIs REST para preenchimento dinâmico dos campos
+- **Rastreamento completo de execução:**
+  - Data e hora de início da execução
+  - Data e hora de término da execução
+  - Cálculo automático de duração (horas e minutos)
+  - Validação: término deve ser posterior ao início
+  - Serviço executado (descrição detalhada)
+  - Diagnóstico de falha (para não conformidades)
 - Atribuição a executantes
 - Acompanhamento de status (Pendente, Em Andamento, Concluída)
-- Checklist interativo para execução
+- Checklist interativo para execução (apenas ordens programadas)
 
 ### 4. Campos Dinâmicos de Não Conformidade
 Os campos de não conformidade aparecem automaticamente quando um item é marcado como "Não Conforme":
@@ -271,4 +285,4 @@ O sistema utiliza as seguintes variáveis de ambiente (já configuradas automati
 ✅ Sistema rodando na porta 5000
 
 ## Última Atualização
-27 de outubro de 2025 - Implementados campos adicionais no cadastro de empresas (CNPJ, CEP, Cidade, País e upload de logo com validações de segurança). Relatórios de ordem de serviço em PDF agora exibem logo e CNPJ da empresa no cabeçalho e endereço completo no rodapé. Corrigido loop infinito no mapa anual de 52 semanas para planos com frequência horária sub-diária.
+27 de outubro de 2025 - **Sistema de Ordens Não Programadas Completo**: Implementado suporte para dois tipos de ordens (Programadas e Não Programadas) com rastreamento detalhado de execução. Ordens não programadas permitem criação manual com seleção hierárquica em cascata (Empresa → Setor → Área → Equipamento) via APIs REST dinâmicas. Adicionado rastreamento completo com data/hora de início, data/hora de término, cálculo automático de duração em tempo real, validação de datas (backend e frontend), serviço executado e diagnóstico de falha. Interface atualizada com modais duplos, alertas visuais de duração e campos condicionais para checklist (somente ordens programadas).
