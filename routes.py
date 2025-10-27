@@ -975,12 +975,24 @@ def relatorio_ordem_pdf(ordem_id):
     
     # Construir caminho absoluto do logo se existir
     logo_path = None
-    if ordem.plano and ordem.plano.equipamento:
-        empresa = ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa
-        if empresa.logo_filename:
-            logo_path = os.path.abspath(os.path.join('static', 'logos', empresa.logo_filename))
+    empresa = None
     
-    return gerar_pdf('relatorio_ordem.html', ordem=ordem, data_geracao=datetime.now(), logo_path=logo_path)
+    # Determinar empresa baseado no tipo de ordem
+    if ordem.tipo_ordem == 'programada' and ordem.plano and ordem.plano.equipamento:
+        empresa = ordem.plano.equipamento.subconjunto.conjunto.area.setor.empresa
+    elif ordem.tipo_ordem == 'nao_programada' and ordem.setor:
+        empresa = ordem.setor.empresa
+    
+    if empresa and empresa.logo_filename:
+        logo_path = os.path.abspath(os.path.join('static', 'logos', empresa.logo_filename))
+    
+    # Escolher template baseado no tipo de ordem
+    if ordem.tipo_ordem == 'nao_programada':
+        template = 'relatorio_ordem_nao_programada.html'
+    else:
+        template = 'relatorio_ordem.html'
+    
+    return gerar_pdf(template, ordem=ordem, data_geracao=datetime.now(), logo_path=logo_path)
 
 @main_bp.route('/relatorios/ordens/<int:ordem_id>/excel')
 @login_required

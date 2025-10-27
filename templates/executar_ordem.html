@@ -305,6 +305,11 @@ function calcularDuracao() {
     const duracaoDisplay = document.getElementById('duracao-display');
     const duracaoTexto = document.getElementById('duracao-texto');
     
+    // Verificar se todos os elementos existem
+    if (!inicioInput || !fimInput || !duracaoDisplay || !duracaoTexto) {
+        return;
+    }
+    
     if (!inicioInput.value || !fimInput.value) {
         duracaoDisplay.style.display = 'none';
         return;
