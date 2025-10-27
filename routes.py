@@ -872,41 +872,66 @@ def executar_ordem(ordem_id):
 
     if request.method == 'POST':
         ordem.status = 'em_andamento'
+        
+        # Processar campos de rastreamento de execução
+        data_hora_inicio_str = request.form.get('data_hora_inicio')
+        data_hora_fim_str = request.form.get('data_hora_fim')
+        
+        if data_hora_inicio_str:
+            ordem.data_hora_inicio = datetime.strptime(data_hora_inicio_str, '%Y-%m-%dT%H:%M')
+        
+        if data_hora_fim_str:
+            data_hora_fim = datetime.strptime(data_hora_fim_str, '%Y-%m-%dT%H:%M')
+            
+            # Validar que data de término é posterior ao início
+            if ordem.data_hora_inicio and data_hora_fim < ordem.data_hora_inicio:
+                flash('Data/hora de término deve ser posterior ao início!', 'danger')
+                return redirect(url_for('main.executar_ordem', ordem_id=ordem.id))
+            
+            ordem.data_hora_fim = data_hora_fim
+        
+        ordem.servico_executado = request.form.get('servico_executado')
+        ordem.diagnostico_falha = request.form.get('diagnostico_falha')
 
-        for item in ordem.plano.itens:
-            resultado = request.form.get(f'resultado_{item.id}')
-            observacao = request.form.get(f'observacao_{item.id}')
-            valor_atual = request.form.get(f'valor_atual_{item.id}')
+        # Processar checklist apenas para ordens programadas
+        if ordem.tipo_ordem == 'programada' and ordem.plano and ordem.plano.itens:
+            for item in ordem.plano.itens:
+                resultado = request.form.get(f'resultado_{item.id}')
+                observacao = request.form.get(f'observacao_{item.id}')
+                valor_atual = request.form.get(f'valor_atual_{item.id}')
 
-            item_apontado = ItemInspecaoApontado.query.filter_by(
-                ordem_id=ordem.id,
-                item_inspecao_id=item.id
-            ).first()
-
-            if not item_apontado:
-                item_apontado = ItemInspecaoApontado(
+                item_apontado = ItemInspecaoApontado.query.filter_by(
                     ordem_id=ordem.id,
                     item_inspecao_id=item.id
-                )
-                db.session.add(item_apontado)
+                ).first()
 
-            item_apontado.resultado = resultado
-            item_apontado.observacao = observacao
-            item_apontado.valor_atual = float(valor_atual) if valor_atual else None
+                if not item_apontado:
+                    item_apontado = ItemInspecaoApontado(
+                        ordem_id=ordem.id,
+                        item_inspecao_id=item.id
+                    )
+                    db.session.add(item_apontado)
 
-            if resultado == 'nao_conforme':
-                item_apontado.falha = request.form.get(f'falha_{item.id}')
-                item_apontado.solucao = request.form.get(f'solucao_{item.id}')
-                tempo = request.form.get(f'tempo_{item.id}')
-                qtde = request.form.get(f'qtde_{item.id}')
-                item_apontado.tempo_necessario = float(tempo) if tempo else None
-                item_apontado.qtde_executantes = int(qtde) if qtde else None
-                item_apontado.materiais = request.form.get(f'materiais_{item.id}')
-                item_apontado.outros = request.form.get(f'outros_{item.id}')
+                item_apontado.resultado = resultado
+                item_apontado.observacao = observacao
+                item_apontado.valor_atual = float(valor_atual) if valor_atual else None
+
+                if resultado == 'nao_conforme':
+                    item_apontado.falha = request.form.get(f'falha_{item.id}')
+                    item_apontado.solucao = request.form.get(f'solucao_{item.id}')
+                    tempo = request.form.get(f'tempo_{item.id}')
+                    qtde = request.form.get(f'qtde_{item.id}')
+                    item_apontado.tempo_necessario = float(tempo) if tempo else None
+                    item_apontado.qtde_executantes = int(qtde) if qtde else None
+                    item_apontado.materiais = request.form.get(f'materiais_{item.id}')
+                    item_apontado.outros = request.form.get(f'outros_{item.id}')
 
         if 'finalizar' in request.form:
             ordem.status = 'concluida'
             ordem.data_conclusao = datetime.utcnow()
+            # Se não preencheu data_hora_fim, usar data_conclusao
+            if not ordem.data_hora_fim:
+                ordem.data_hora_fim = ordem.data_conclusao
             flash('Ordem finalizada com sucesso!', 'success')
         else:
             flash('Progresso salvo!', 'success')

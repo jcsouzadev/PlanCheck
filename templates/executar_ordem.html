@@ -18,14 +18,57 @@
 
 <div class="row mb-3">
     <div class="col-12">
-        <div class="alert alert-info">
+        <div class="alert" style="background-color: #F2EBF3; border-left: 4px solid #295673;">
+            {% if ordem.tipo_ordem == 'programada' %}
             <strong>Plano:</strong> {{ ordem.plano.titulo if ordem.plano else '-' }} <br>
             <strong>Equipamento:</strong> {{ ordem.plano.equipamento.nome if ordem.plano and ordem.plano.equipamento else '-' }}
+            {% else %}
+            <strong>Tipo:</strong> <span class="badge" style="background-color: #FFC107; color: #333;">Ordem Não Programada</span><br>
+            <strong>Serviço Solicitado:</strong> {{ ordem.servico_solicitado or '-' }}<br>
+            <strong>Equipamento:</strong> {{ ordem.equipamento_direto.nome if ordem.equipamento_direto else '-' }}
+            {% endif %}
         </div>
     </div>
 </div>
 
 <form method="POST">
+    <!-- Campos de Rastreamento de Execução -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background-color: #295673; color: white;">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Rastreamento de Execução</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_hora_inicio" class="form-label">Data e Hora de Início *</label>
+                                <input type="datetime-local" class="form-control" id="data_hora_inicio" name="data_hora_inicio" 
+                                       value="{{ ordem.data_hora_inicio.strftime('%Y-%m-%dT%H:%M') if ordem.data_hora_inicio else '' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_hora_fim" class="form-label">Data e Hora de Término</label>
+                                <input type="datetime-local" class="form-control" id="data_hora_fim" name="data_hora_fim"
+                                       value="{{ ordem.data_hora_fim.strftime('%Y-%m-%dT%H:%M') if ordem.data_hora_fim else '' }}"
+                                       onchange="calcularDuracao()">
+                                <small class="text-muted">Preencher ao finalizar a ordem</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-success" id="duracao-display" style="display: none;">
+                                <strong><i class="bi bi-stopwatch"></i> Duração da Execução:</strong> <span id="duracao-texto"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -154,6 +197,33 @@
         </div>
     </div>
     
+    <!-- Resumo da Execução -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background-color: #7AAD6B; color: white;">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Resumo da Execução</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="servico_executado" class="form-label">Serviço Executado *</label>
+                            <textarea class="form-control" id="servico_executado" name="servico_executado" rows="3" 
+                                      placeholder="Descreva o serviço realizado..." required>{{ ordem.servico_executado or '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="diagnostico_falha" class="form-label">Diagnóstico da Falha / Observações</label>
+                            <textarea class="form-control" id="diagnostico_falha" name="diagnostico_falha" rows="3"
+                                      placeholder="Caso tenha identificado alguma falha ou problema, descreva aqui...">{{ ordem.diagnostico_falha or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row mt-3">
         <div class="col-12">
             <a href="{{ url_for('main.ver_ordem', ordem_id=ordem.id) }}" class="btn btn-secondary">
@@ -228,5 +298,48 @@ function validarValorMedicao(itemId) {
         input.classList.add('border-success');
     }
 }
+
+function calcularDuracao() {
+    const inicioInput = document.getElementById('data_hora_inicio');
+    const fimInput = document.getElementById('data_hora_fim');
+    const duracaoDisplay = document.getElementById('duracao-display');
+    const duracaoTexto = document.getElementById('duracao-texto');
+    
+    if (!inicioInput.value || !fimInput.value) {
+        duracaoDisplay.style.display = 'none';
+        return;
+    }
+    
+    const inicio = new Date(inicioInput.value);
+    const fim = new Date(fimInput.value);
+    
+    const diferencaMs = fim - inicio;
+    
+    if (diferencaMs < 0) {
+        duracaoTexto.textContent = 'Data/hora de término deve ser posterior ao início!';
+        duracaoTexto.style.color = 'red';
+        duracaoDisplay.classList.remove('alert-success');
+        duracaoDisplay.classList.add('alert-danger');
+        duracaoDisplay.style.display = 'block';
+        return;
+    }
+    
+    const horas = Math.floor(diferencaMs / (1000 * 60 * 60));
+    const minutos = Math.floor((diferencaMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    duracaoTexto.textContent = `${horas}h ${minutos}min`;
+    duracaoTexto.style.color = '#060';
+    duracaoDisplay.classList.remove('alert-danger');
+    duracaoDisplay.classList.add('alert-success');
+    duracaoDisplay.style.display = 'block';
+}
+
+// Calcular duração ao carregar a página se os campos estiverem preenchidos
+document.addEventListener('DOMContentLoaded', function() {
+    calcularDuracao();
+    
+    // Também calcular quando mudar o início
+    document.getElementById('data_hora_inicio').addEventListener('change', calcularDuracao);
+});
 </script>
 {% endblock %}
