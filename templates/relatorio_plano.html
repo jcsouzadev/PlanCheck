@@ -1,123 +1,306 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório - {{ plano.titulo }}</title>
+    <title>Plano de Inspeção - {{ plano.titulo }}</title>
     <style>
+        /* ========================================================================= */
+        /* DEFINIÇÕES DE PÁGINA A4 (WeasyPrint / CSS Paged Media) */
+        /* ========================================================================= */
+        @page {
+            size: A4;
+            margin-top: 2cm; 
+            margin-bottom: 2cm;
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
+            
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages) " | PlanCheck | Gerado em {{ now.strftime('%d/%m/%Y %H:%M') }}";
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                color: #555;
+            }
+        }
+        
+        /* ========================================================================= */
+        /* ESTILIZAÇÃO GERAL */
+        /* ========================================================================= */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            font-size: 12px;
-        }
-        h1 {
+            font-size: 10pt;
             color: #333;
-            border-bottom: 3px solid #007bff;
-            padding-bottom: 10px;
+            line-height: 1.4;
         }
-        h2 {
+
+        .header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #295673;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .header-main .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-main .logo-section img {
+            max-height: 60px;
+            max-width: 120px;
+        }
+        
+        .header-main .logo-text {
+            font-size: 12pt;
+            color: #295673;
+        }
+        
+        .header-main .logo-text .empresa-nome {
+            font-weight: bold;
+            font-size: 14pt;
+        }
+        
+        .header-main .logo-text .empresa-cnpj {
+            font-size: 9pt;
             color: #555;
-            margin-top: 20px;
         }
+        
+        .header-main .title-box {
+            text-align: right;
+            border: 1px solid #295673;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+        }
+        
+        .header-main .title-box h1 {
+            margin: 0;
+            font-size: 14pt;
+            color: #295673;
+        }
+        
+        .header-main .title-box p {
+            margin: 0;
+            font-size: 10pt;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 9pt;
+            font-weight: bold;
+            border-radius: 3px;
+            background-color: #295673;
+            color: #fff;
+        }
+        
+        .badge-visual { background-color: #17a2b8; }
+        .badge-sensitiva { background-color: #ffc107; color: #000; }
+        .badge-medicoes { background-color: #7AAD6B; }
+        
+        /* Rodapé com endereço */
+        .footer-address {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+        }
+
+        /* ========================================================================= */
+        /* DETALHES DO PLANO */
+        /* ========================================================================= */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+        }
+        
+        .info-item {
+            padding: 5px;
+        }
+        
+        .info-item strong {
+            display: block;
+            color: #555;
+            font-size: 8pt;
+            margin-bottom: 2px;
+        }
+        
+        .info-item span {
+            display: block;
+            font-size: 10pt;
+            font-weight: bold;
+            color: #222;
+        }
+        
+        .info-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #295673;
+        }
+        
+        .info-section h2 {
+            margin-top: 0;
+            color: #295673;
+            font-size: 12pt;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
         }
+        
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+        
         th {
-            background-color: #007bff;
+            background-color: #295673;
             color: white;
+            font-size: 9pt;
         }
+        
         tr:nth-child(even) {
             background-color: #f2f2f2;
-        }
-        .info-section {
-            background-color: #e9ecef;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-        .info-section p {
-            margin: 5px 0;
-        }
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .badge-visual {
-            background-color: #17a2b8;
-            color: white;
-        }
-        .badge-sensitiva {
-            background-color: #ffc107;
-            color: black;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 10px;
-            color: #666;
         }
     </style>
 </head>
 <body>
-    <h1>Relatório do Plano de Inspeção</h1>
+
+    <header class="header-main">
+        <div class="logo-section">
+            {% if plano.equipamento and plano.equipamento.subconjunto.conjunto.area.setor.empresa.logo_filename %}
+            <img src="file://{{ logo_path }}" alt="Logo da Empresa">
+            {% endif %}
+            <div class="logo-text">
+                <div class="empresa-nome">
+                    {% if plano.equipamento %}
+                        {{ plano.equipamento.subconjunto.conjunto.area.setor.empresa.nome }}
+                    {% else %}
+                        PlanCheck
+                    {% endif %}
+                </div>
+                {% if plano.equipamento and plano.equipamento.subconjunto.conjunto.area.setor.empresa.cnpj %}
+                <div class="empresa-cnpj">CNPJ: {{ plano.equipamento.subconjunto.conjunto.area.setor.empresa.cnpj }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="title-box">
+            <h1>PLANO DE INSPEÇÃO</h1>
+            <p>ID: {{ plano.id }}</p>
+        </div>
+    </header>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <strong>Título</strong>
+            <span>{{ plano.titulo }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Equipamento</strong>
+            <span>{{ plano.equipamento.nome if plano.equipamento else '-' }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Código</strong>
+            <span>{{ plano.equipamento.codigo if plano.equipamento and plano.equipamento.codigo else '-' }}</span>
+        </div>
+        
+        <div class="info-item">
+            <strong>Tipo de Geração</strong>
+            <span>
+                {% if plano.tipo_geracao == 'horario' %}Por Hora
+                {% elif plano.tipo_geracao == 'diario' %}Diário
+                {% elif plano.tipo_geracao == 'data_abertura' %}Por Data de Abertura
+                {% else %}-
+                {% endif %}
+            </span>
+        </div>
+        <div class="info-item">
+            <strong>Frequência</strong>
+            <span>{{ plano.frequencia if plano.frequencia else '-' }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Data Início</strong>
+            <span>{{ plano.data_inicio.strftime('%d/%m/%Y') if plano.data_inicio else '-' }}</span>
+        </div>
+    </div>
     
     <div class="info-section">
-        <p><strong>Título:</strong> {{ plano.titulo }}</p>
-        <p><strong>Equipamento:</strong> {{ plano.equipamento.nome if plano.equipamento else '-' }}</p>
-        <p><strong>Código do Equipamento:</strong> {{ plano.equipamento.codigo if plano.equipamento and plano.equipamento.codigo else '-' }}</p>
-        <p><strong>Tipo de Geração:</strong> 
-            {% if plano.tipo_geracao == 'horario' %}Por Hora
-            {% elif plano.tipo_geracao == 'diario' %}Diário
-            {% elif plano.tipo_geracao == 'data_abertura' %}Por Data de Abertura
-            {% endif %}
-        </p>
-        <p><strong>Frequência:</strong> {{ plano.frequencia if plano.frequencia else '-' }}</p>
-        <p><strong>Data de Início:</strong> {{ plano.data_inicio.strftime('%d/%m/%Y') if plano.data_inicio else '-' }}</p>
-        <p><strong>Data de Criação:</strong> {{ plano.data_criacao.strftime('%d/%m/%Y %H:%M') if plano.data_criacao else '-' }}</p>
+        <h2>Itens de Inspeção</h2>
+        {% if plano.itens %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40px;">#</th>
+                    <th>Descrição / Orientações</th>
+                    <th style="width: 100px;">Tipo</th>
+                    <th style="width: 150px;">Valores Referência</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in plano.itens %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <strong>{{ item.descricao }}</strong>
+                        {% if item.observacao %}
+                        <br><small style="color: #666;">{{ item.observacao }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.tipo == 'visual' %}
+                        <span class="badge badge-visual">VISUAL</span>
+                        {% elif item.tipo == 'sensitiva' %}
+                        <span class="badge badge-sensitiva">SENSITIVA</span>
+                        {% elif item.tipo == 'medicoes' %}
+                        <span class="badge badge-medicoes">MEDIÇÕES</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.tipo == 'medicoes' %}
+                            {% if item.valor_min is not none or item.valor_max is not none %}
+                                Min: {{ item.valor_min if item.valor_min is not none else 'N/A' }}<br>
+                                Max: {{ item.valor_max if item.valor_max is not none else 'N/A' }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nenhum item cadastrado neste plano.</p>
+        {% endif %}
     </div>
-    
-    <h2>Itens de Inspeção</h2>
-    {% if plano.itens %}
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Descrição</th>
-                <th>Tipo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in plano.itens %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ item.descricao }}</td>
-                <td>
-                    {% if item.tipo == 'visual' %}
-                    <span class="badge badge-visual">VISUAL</span>
-                    {% elif item.tipo == 'sensitiva' %}
-                    <span class="badge badge-sensitiva">SENSITIVA</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>Nenhum item cadastrado neste plano.</p>
+
+    {% if plano.equipamento %}
+    {% set empresa = plano.equipamento.subconjunto.conjunto.area.setor.empresa %}
+    <div class="footer-address">
+        <strong>{{ empresa.nome }}</strong>
+        {% if empresa.cnpj %} | CNPJ: {{ empresa.cnpj }}{% endif %}
+        <br>
+        {% if empresa.cep %}CEP: {{ empresa.cep }}{% endif %}
+        {% if empresa.cidade %} | {{ empresa.cidade }}{% endif %}
+        {% if empresa.pais %} | {{ empresa.pais }}{% endif %}
+    </div>
     {% endif %}
     
-    <div class="footer">
-        <p>PlanCheck - Sistema de Gestão de Manutenção e Inspeção</p>
-        <p>Gerado em: {{ now.strftime('%d/%m/%Y %H:%M:%S') if now else '' }}</p>
-    </div>
 </body>
 </html>
